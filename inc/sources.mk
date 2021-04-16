@@ -9,11 +9,11 @@ MainModules  := $(patsubst src/main_modules/%,src/.compiled/main_modules/%,$(Mai
 Escripts := $(patsubst src/bin/%.escript,src/.binned/%.escript,$(EscriptSource))
 .PHONY: escripts
 escripts: $(Escripts) ## copy escripts into running container
-	echo ' - loaded escripts in src/bin into running container '
+	@echo ' - loaded escripts in src/bin into running container '
 
 .PHONY: main-modules
 main-modules: $(MainModules) ## copy main-modules into docker volume and compile
-	echo ' - main-modules copied into docker volume and checked modules compiled'
+	@echo ' - main-modules copied into docker volume and checked modules compiled'
 
 .PHONY: library-modules
 library-modules: $(LibraryModules) ## ordered sequence copy of library-modules into docker volume and compile
