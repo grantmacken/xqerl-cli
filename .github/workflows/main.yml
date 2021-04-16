@@ -44,12 +44,12 @@ jobs:
           printf %60s | tr ' ' '-' && echo
       - name: xq query command
         run: |
-          echo ' - run a simple xQuery' 
-          echo ' - xq run: requires 1 param {string}'
+          echo ' - parse and run a simple xQuery expression' 
+          echo ' - xq query: requires 1 param {string}'
           echo ' - where param {string} is a xQuery expression'
-          echo ' - run command examples' 
+          echo ' - query command examples' 
           printf %60s | tr ' ' '-' && echo
-          echo "> bin/xq query 'current-date() => string()'"
+          echo "> xq query 'current-date() => string()'"
           bin/xq query 'current-date() => string()'
           printf %60s | tr ' ' '-' && echo
       - name: xq compile command
