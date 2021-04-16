@@ -11,7 +11,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 1
-      - name: all make commands
+      - name: list make commands
         run: |
           echo ' list all available "make" commands'
           echo '> make'
@@ -35,16 +35,27 @@ jobs:
           echo '> make'
           make up
           printf %60s | tr ' ' '-' && echo
-      - name: all xq commands
+      - name: list xq commands
         run: |
           printf %60s | tr ' ' '-' && echo
           echo ' list "xq" available commands'
           echo '> xq'
           xq
           printf %60s | tr ' ' '-' && echo
+      - name: xq query command
+        run: |
+          echo ' - run a simple xQuery' 
+          echo ' - xq run: requires 1 param {string}'
+          echo ' - where param {string} is a xQuery expression'
+          echo ' - run command examples' 
+          printf %60s | tr ' ' '-' && echo
+          echo "> bin/xq query 'current-date() => string()'"
+          bin/xq query 'current-date() => string()'
+          printf %60s | tr ' ' '-' && echo
       - name: xq compile command
         run: |
           echo ' - compile xQuery *main* and *library* modules' 
+          echo ' - xq compile: requires 1 param {file-name}'
           echo ' - compile command examples' 
           printf %60s | tr ' ' '-' && echo
           echo ' - compile a main-module'
