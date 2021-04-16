@@ -33,8 +33,7 @@ jobs:
           echo ' list "xq" available commands'
           echo '> xq'
           xq
-       - name: Stop running xqerl
-        run: |
-          make down
+      - name: Stop running xqerl
+        run: | make down
           printf %60s | tr ' ' '-' && echo
 

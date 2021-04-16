@@ -2,8 +2,6 @@
 
 `xq` is a terminal cli for a dockerized xqerl
 
-
-
  [xqerl](https://zadean.github.io/xqerl)
  maintained by 
  [Zachary Dean](https://github.com/zadean),
@@ -21,9 +19,10 @@ you can use as a template when creating xQuery projects.
 git clone git@github.com:grantmacken/.git
 cd xqerl-cli
 make init
+xq
 ```
 
-This will make sure xq is on your exec path,
+`make init` will make sure xq is on your exec path,
 so you can type in `xq` instead of `bin/xq`
 `make init` also pulls down in some images.
 The main image is the dockerized xqerl application.
