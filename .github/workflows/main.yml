@@ -29,26 +29,39 @@ jobs:
           make pull
           echo -n ' - check available: '
           docker images | grep -oP 'alpine-zopfli'
-      - name: Start running xqerl
+      - name: Start running xqerl in a container
         run: |
+          printf %60s | tr ' ' '-' && echo
+          echo '> make'
           make up
           printf %60s | tr ' ' '-' && echo
       - name: xq commands check
         run: |
+          printf %60s | tr ' ' '-' && echo
           echo ' list "xq" available commands'
           echo '> xq'
           xq
           printf %60s | tr ' ' '-' && echo
-      - name: xq shell command
+      - name: xq call command
         run: |
-          echo ' - eval command [ eval ] evaluate available xqerl erlang expressions' 
+          echo ' - call xqerl erlang expressions' 
+          echo ' - call command examples' 
+          printf %60s | tr ' ' '-' && echo
+          echo '> xq call xqldb_db_server exists http://example.com'
+          xq call xqldb_db_server exists http://example.com
+          printf %60s | tr ' ' '-' && echo
+      - name: xq eval command        
+        run: |
+          echo ' - evaluate available xqerl erlang expressions'
+          echo ' - eval command examples' 
           printf %60s | tr ' ' '-' && echo
           echo ">  xq eval 'calendar:local_time().'"
           xq eval 'calendar:local_time().'
           printf %60s | tr ' ' '-' && echo
-      - name: xq eval command
+      - name: xq shell command
         run: |
-          echo ' - shell cmd [ sh ] run alpine busybox shell commands ' 
+          echo ' - run alpine busybox shell commands ' 
+          echo ' - eval command examples' 
           printf %60s | tr ' ' '-' && echo
           echo ">  bin/xq  sh 'date -I'"
           bin/xq  sh 'date -I'
