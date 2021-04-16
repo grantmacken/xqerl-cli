@@ -52,14 +52,25 @@ jobs:
           echo ' - like "example.com/path-to-resource.xml" or "src/data/example.com/examples/employees.xml"'
           echo ' - put command examples' 
           printf %60s | tr ' ' '-' && echo
+          echo ' - store employees.xml as a document-node() item'
           echo '> xq put example.com/examples/employees.xml'
           xq put example.com/examples/employees.xml
           printf %60s | tr ' ' '-' && echo
+          echo ' - store colors.json as a array(*) item'
           echo '> xq put example.com/examples/colors.json'
           xq put example.com/examples/colors.json
           printf %60s | tr ' ' '-' && echo
+          echo ' - store mildred.json as a map(*) item'
           echo '> xq put example.com/examples/mildred.json'
           xq put example.com/examples/mildred.json
+          printf %60s | tr ' ' '-' && echo
+          echo ' - store mildred.json as a map(*) item'
+          echo '> xq put example.com/examples/mildred.json'
+          xq put example.com/examples/mildred.json
+          printf %60s | tr ' ' '-' && echo
+          echo ' - store content/index.md as a document-node() item'
+          echo '> xq put example.com/content/index.md'
+          xq put example.com/content/index.md
       - name: xq query command
         run: |
           echo ' - parse and run a simple xQuery expression' 
