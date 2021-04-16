@@ -6,8 +6,16 @@ MAKEFLAGS += --warn-undefined-variables
 MAKEFLAGS += --no-builtin-rules
 include .env
 XQERL_IMAGE := docker.pkg.github.com/grantmacken/alpine-xqerl/xq:$(GHPKG_VER)
+.DEFAULT_GOAL := help
 
 include inc/*
+
+.PHONY: help
+help: ## show this help	
+	@cat $(MAKEFILE_LIST) | 
+	grep -oP '^[a-zA-Z_-]+:.*?## .*$$' |
+	sort |
+	awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 .PHONY: init
 init: down clean
