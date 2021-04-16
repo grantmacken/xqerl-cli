@@ -1,12 +1,10 @@
-##################################################################
 .PHONY: pull
 pull: 
-	@docker pull $(XQERL_IMAGE)
+	@docker pull $(XQERL_IMAGE) &> /dev/null
 	@docker pull docker.pkg.github.com/grantmacken/alpine-scour/scour:0.0.2 &> /dev/null
 	@docker pull docker.pkg.github.com/grantmacken/alpine-zopfli/zopfli:0.0.1 &> /dev/null
 	@docker pull docker.pkg.github.com/grantmacken/alpine-cmark-gfm/cmark-gfm:0.29.0 &> /dev/null
 
-##################################################################
 
 MustHaveNetwork = docker network list --format "{{.Name}}" | \
  grep -q $(1) || docker network create $(NETWORK) &>/dev/null
