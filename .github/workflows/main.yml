@@ -14,7 +14,7 @@ jobs:
       - name: check make command
         run: |
           echo ' list "make" available commands'
-          echo '> make
+          echo '> make'
           make
           printf %60s | tr ' ' '-' && echo
       - name: Set up local bin
@@ -29,7 +29,6 @@ jobs:
           make pull
           echo -n ' - check available: '
           docker images | grep -oP 'alpine-zopfli'
-
       - name: Start running xqerl
         run: |
           make up
@@ -40,12 +39,20 @@ jobs:
           echo '> xq'
           xq
           printf %60s | tr ' ' '-' && echo
-      - name: shell command
+      - name: xq shell command
         run: |
-          echo ' - shell actions [ sh ] run alpine busybox shell commands ' 
+          echo ' - eval command [ eval ] evaluate available xqerl erlang expressions' 
+          printf %60s | tr ' ' '-' && echo
+          echo ">  xq eval 'calendar:local_time().'"
+          xq eval 'calendar:local_time().'
+          printf %60s | tr ' ' '-' && echo
+      - name: xq eval command
+        run: |
+          echo ' - shell cmd [ sh ] run alpine busybox shell commands ' 
           printf %60s | tr ' ' '-' && echo
           echo ">  bin/xq  sh 'date -I'"
           bin/xq  sh 'date -I'
+          printf %60s | tr ' ' '-' && echo
       - name: Stop running xqerl
         run: | 
           make down
