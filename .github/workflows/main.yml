@@ -42,16 +42,25 @@ jobs:
           echo '> xq'
           xq
           printf %60s | tr ' ' '-' && echo
+      - name: xq compile command
+        run: |
+          echo ' - compile xQuery *main* and *library* modules' 
+          echo ' - compile command examples' 
+          printf %60s | tr ' ' '-' && echo
+          echo ' - compile a main-module'
+          echo '> xq compile turtles.xq'
+          xq compile turtles.xq
+          echo && printf %60s | tr ' ' '-' && echo
       - name: xq run command
         run: |
           echo ' - compile and run xQuery main-module with external arg' 
           echo ' - xq run: requires 2 params {name}.xq {arg}'
           echo ' - run command examples' 
           printf %60s | tr ' ' '-' && echo
-          echo '> bin/xq compile turtles.xq'
+          echo '> xq compile turtles.xq'
           bin/xq compile turtles.xq
           printf %60s | tr ' ' '-' && echo
-          echo '> bin/xq run turtles.xq turtles'
+          echo '> xq run turtles.xq turtles'
           bin/xq run turtles.xq elephants
           printf %60s | tr ' ' '-' && echo
       - name: xq call command
