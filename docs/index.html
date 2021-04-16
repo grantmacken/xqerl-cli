@@ -1,0 +1,125 @@
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><title/></head><body><main><article>
+  <h1>
+    <a href="https://github.com/grantmacken/alpine-xqerl">
+      alpine-xqerl
+    </a>
+  </h1>
+  <p>
+    <a href="https://github.com/grantmacken/alpine-xqerl/actions">
+      <img src="https://github.com/grantmacken/alpine-xqerl/workflows/CI/badge.svg" alt=""/>
+    </a>
+  </p>
+  <p>
+    <a href="https://zadean.github.io/xqerl">
+      xqerl
+    </a>
+    
+    maintained by
+    
+    <a href="https://github.com/zadean">
+      Zachary Dean
+    </a>
+    ,
+    
+    is an Erlang XQuery 3.1 Processor and XML Database.
+  </p>
+  <h2>
+    Why xqerl.
+  </h2>
+  <p>
+    xQuery 3.1 Processor
+  </p>
+  <ul>
+    <li>
+      <p>
+        a well tested xQuery 3.1 Processor
+      </p>
+    </li>
+    <li>
+      <p>
+        built for xQuery 3.1, with no prior baggage making it more lean.
+      </p>
+    </li>
+    <li>
+      <p>
+        built with erlang, compiled to run as a 
+        <strong>
+          reliable
+        </strong>
+         OTP beam application
+      </p>
+    </li>
+  </ul>
+  <p>
+    The modules
+  </p>
+  <ul>
+    <li>
+      <p>
+        <strong>
+          http client module
+        </strong>
+         requests result in XDM items
+      </p>
+    </li>
+  </ul>
+  <ul>
+    <li>
+      <p>
+        fetch and parse HTML doc produces a document-node XDM item
+      </p>
+    </li>
+    <li>
+      <p>
+        fetch and parse JSON doc produces a map or array XDM items
+      </p>
+    </li>
+  </ul>
+  <ul>
+    <li>
+      <p>
+        fast parallel processing using the 
+        <strong>
+          actor module
+        </strong>
+      </p>
+    </li>
+  </ul>
+  <p>
+    The database
+  </p>
+  <ul>
+    <li>
+      <p>
+        can store data as XDM items: document-nodes, maps, arrays and even functions
+      </p>
+    </li>
+    <li>
+      <p>
+        can store 
+        <em>
+          links
+        </em>
+         to binary files
+      </p>
+    </li>
+    <li>
+      <p>
+        uri domain based databases. 'http://example.com', 'http://markup.nz'
+        
+        two different databases
+      </p>
+    </li>
+  </ul>
+   could not parse 
+   <figure>
+<a href="https://asciinema.org/a/406861" target="_blank"><img src="https://asciinema.org/a/406861.svg"/></a>
+  <figcaption> using `xq req` to fetch HTML and apply xPath expressions</figcaption>
+</figure>
+
+   <figure>
+<a href="https://asciinema.org/a/407052" target="_blank"><img src="https://asciinema.org/a/407052.svg"/></a>
+  <figcaption> using `xq lookup` to fetch JSON docs and apply xQuery lookup expressions</figcaption>
+</figure> 
+
+</article></main></body></html>

@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+IFS=$'\n\t'
+declare -a args
+args=("$@")
+
+# generic code
+
+function help() { ## show this help	 db-exists)
+  msg "Usage: post <action> [arg]*" 
+	cat "${BASH_SOURCE[0]}" |  
+  grep -oP '[a-z-]+[)]{1}([ ]+)?[#]{2}(.+)$' |
+  awk 'BEGIN {FS = ").*?## "}; {printf "\033[36m%-10s\033[0m %s\n", $1, $2}'
+}
+
+function msg() {
+  echo >&2 -e "${1-}"
+}
+
+function ok (){
+  echo -n "✔  " && echo  $1
+}
+
+function die() {
+  local msg=$(echo -n "✘  " && echo $1)
+  local code=${2-1} # default exit status 1
+  msg "$msg"
+  exit "$code"
+}
+
+# check required arguments
+[[ ${#args[@]} -eq 0 ]] && help && exit
+
+# main functions used in case switch
+function initBin() {
+# make sure we have a home bin on path
+  local HOME_BIN=$HOME/.local/bin
+  if [[ ! "$PATH" == *${HOME_BIN}* ]]; then
+    echo ' - create home bin'
+    export PATH="$PATH:${HOME_BIN}"
+  fi
+ local CWD="$(pwd)"
+ pushd $HOME_BIN &>/dev/null
+  if [[ ! -L  post ]]; then
+    echo ' - create link'
+    ln -s $CWD/bin/post
+  fi
+ popd
+}
+
+case "${args[0]}" in
+ init) ## create a $HOME/bin on PATH, symlink to here
+    initBin
+    ;;
+  article) ## {md-path} {json} create HTML article from markdown example xq article example.com/content/index.md  {}
+    if [[ ${#args[@]} -ne 3 ]]
+    then
+      die "xq article: \n
+      requires 2 params {md-path} {json-string} \n
+      {md-path} - path to markdown file from the src/data dir \n
+      {json-string} - json string
+      example: \n
+      post article example.com/content/index.md '{\"title\":\"home page\"}'"
+    fi
+    indexXML=$(
+    xq put "${args[1]}" | 
+    grep -oP 'location: \K(.+)$')
+    indexArticle=$(
+    docker exec xq xqerl escript bin/scripts/run.escript markup.xq ${indexXML} | 
+    grep -oP 'location: \K(.+)$')
+    docker exec xq xqerl escript bin/scripts/run2.escript wrap.xq ${indexArticle} "${args[2]}"
+    ;;
+  *)
+    help
+    die 'unknown action try one of the above actions'
+esac

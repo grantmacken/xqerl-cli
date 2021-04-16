@@ -1,0 +1,40 @@
+name: CI
+on: 
+  push:
+    branches:
+      - 'main'
+
+jobs:
+  xqerl-cli:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+      - name: Set up local bin
+        run: |
+          mkdir -p $HOME/.local/bin
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          pushd $HOME/.local/bin && ln -s ${GITHUB_WORKSPACE}/bin/xq && popd
+          which xq
+      - name: Github login in and pull helper github packages
+        run: |
+          source .env
+          echo ${{ secrets.GITHUB_TOKEN }} | docker login docker.pkg.github.com --username ${REPO_OWNER} --password-stdin &>/dev/null
+          make pull
+      - name: Start running xqerl
+        run: |
+          make up
+          printf %60s | tr ' ' '-' && echo
+      - name: xq commands check
+        run: |
+          printf %60s | tr ' ' '-' && echo
+          echo ' list "xq" available commands'
+          echo '> xq'
+          xq
+       - name: Stop running xqerl
+        run: |
+          make down
+          printf %60s | tr ' ' '-' && echo
+
