@@ -42,6 +42,24 @@ jobs:
           echo '> xq'
           xq
           printf %60s | tr ' ' '-' && echo
+      - name: xq put command
+        run: |
+          echo ' - from file put XDM item into db' 
+          echo ' - all *data* sources are located in the "./src/data/" directory'
+          echo ' - `xq put {domain-path}` will store a data source as a db *XDM item*'
+          echo ' -  param {domain-path} is the path from "./src/data"'
+          echo ' - a "domain" must be included the {domain-path),'
+          echo ' - like "example.com/path-to-resource.xml" or "src/data/example.com/examples/employees.xml"'
+          echo ' - put command examples' 
+          printf %60s | tr ' ' '-' && echo
+          echo '> xq put example.com/examples/employees.xml'
+          xq put example.com/examples/employees.xml
+          printf %60s | tr ' ' '-' && echo
+          echo '> xq put example.com/examples/colors.json'
+          xq put example.com/examples/colors.json
+          printf %60s | tr ' ' '-' && echo
+          echo '> xq put example.com/examples/mildred.json'
+          xq put example.com/examples/mildred.json
       - name: xq query command
         run: |
           echo ' - parse and run a simple xQuery expression' 
