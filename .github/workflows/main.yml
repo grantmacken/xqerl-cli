@@ -11,9 +11,9 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 1
-      - name: check make command
+      - name: all make commands
         run: |
-          echo ' list "make" available commands'
+          echo ' list all available "make" commands'
           echo '> make'
           make
           printf %60s | tr ' ' '-' && echo
@@ -35,12 +35,24 @@ jobs:
           echo '> make'
           make up
           printf %60s | tr ' ' '-' && echo
-      - name: xq commands check
+      - name: all xq commands
         run: |
           printf %60s | tr ' ' '-' && echo
           echo ' list "xq" available commands'
           echo '> xq'
           xq
+          printf %60s | tr ' ' '-' && echo
+      - name: xq run command
+        run: |
+          echo ' - compile and run xQuery main-module with external arg' 
+          echo ' - xq run: requires 2 params {name}.xq {arg}'
+          echo ' - run command examples' 
+          printf %60s | tr ' ' '-' && echo
+          echo '> bin/xq compile turtles.xq'
+          bin/xq compile turtles.xq
+          printf %60s | tr ' ' '-' && echo
+          echo '> bin/xq run turtles.xq turtles'
+          bin/xq run turtles.xq elephants
           printf %60s | tr ' ' '-' && echo
       - name: xq call command
         run: |
