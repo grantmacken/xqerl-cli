@@ -18,9 +18,17 @@ jobs:
           pushd $HOME/.local/bin && ln -s ${GITHUB_WORKSPACE}/bin/xq && popd
           which xq
       - name: Github login in and pull helper github packages
-        run: echo ${{ secrets.GITHUB_TOKEN }} | docker login docker.pkg.github.com --username ${REPO_OWNER} --password-stdin
-      - name: Pull in docker paxkages
         run: |
+          echo "Home: ${HOME}"
+          echo "GITHUB_WORKFLOW: ${GITHUB_WORKFLOW}"
+          echo "GITHUB_ACTIONS: ${GITHUB_ACTIONS}"
+          echo "GITHUB_ACTOR: ${GITHUB_ACTOR}"
+          echo "GITHUB_REPOSITORY: ${GITHUB_REPOSITORY}"
+          echo "GITHUB_EVENT_NAME: ${GITHUB_EVENT_NAME}"
+          echo "GITHUB_WORKSPACE: ${GITHUB_WORKSPACE}"
+          echo "GITHUB_SHA: ${GITHUB_SHA}"
+          echo "GITHUB_REF: ${GITHUB_REF}"
+          echo ${{ secrets.GITHUB_TOKEN }} | docker login docker.pkg.github.com --username grantmacken --password-stdin >/dev/null
           make pull
           docker images | grep -oP 'alpine-zopfli'
       - name: Start running xqerl
@@ -37,4 +45,3 @@ jobs:
         run: | 
           make down
           printf %60s | tr ' ' '-' && echo
-
