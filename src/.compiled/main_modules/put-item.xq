@@ -51,6 +51,7 @@ let $uri :=
     case "svg" return $uriBase => concat( $ext )
     case "xml" return $uriBase => concat( $ext )
     case "cmark" return $uriBase => concat( $ext )
+    case "csv" return $uriBase => concat( $item => $getItemType())
     case "json" return $uriBase => concat( $item => $getItemType())
     default return   error( $dbIO, ``[ [ `{$ext}` ] can not handle extension ]``) 
 
