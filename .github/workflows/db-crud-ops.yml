@@ -1,4 +1,4 @@
-name: CI
+name: db_crud_ops
 on: 
   push:
     branches:
