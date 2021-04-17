@@ -71,6 +71,13 @@ jobs:
           echo ' - array and map XDM items will be serialized as JSON strings'
           echo '> xq get example.com/examples/colors.array'
           bin/xq get example.com/examples/colors.array
+          printf %60s | tr ' ' '-' && echo
+      - name: xq delete
+        run: |
+          echo '- xq delete {db-path} deletes XDM item from the db'
+          echo '> xq delete example.com/examples/employees.xml'
+          xq delete example.com/examples/employees.xml
+          printf %60s | tr ' ' '-' && echo
       - name: Stop running xqerl
         run: | 
           make down
