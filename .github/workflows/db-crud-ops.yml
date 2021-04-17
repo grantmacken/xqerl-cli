@@ -62,7 +62,7 @@ jobs:
           echo '> xq available example.com/examples/nothing.array'
           bin/xq available example.com/examples/nothing.json
           printf %60s | tr ' ' '-' && echo
-      - name: xq available
+      - name: xq get
         run: |
           echo ' - xq get {db-path} returns a serialized XDM item'
           echo ' - document-node XDM items will be serialized as XML strings'
