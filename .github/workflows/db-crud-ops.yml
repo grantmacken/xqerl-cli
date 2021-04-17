@@ -48,6 +48,8 @@ jobs:
           bin/xq put example.com/examples/colors.json
           echo '> xq put example.com/examples/mildred.json'
           bin/xq put example.com/examples/mildred.json
+          echo '> xq put example.com/content/index.md'
+          bin/xq put example.com/content/index.md
       - name: xq list
         run: |
           echo ' - xq list {db-path} lists db resources, including links'
