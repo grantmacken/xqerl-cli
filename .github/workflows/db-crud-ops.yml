@@ -37,7 +37,7 @@ jobs:
           echo ' -  param {domain-path} is the path from "./src/data"'
           echo ' - a "domain" must be included the {domain-path),'
           echo ' - like "example.com/path-to-resource.xml" or "src/data/example.com/examples/employees.xml"'
-      - name:  put JSON documents into db as an  an array or map items
+      - name:  put JSON documents into db as array or map items
         run: |
           echo ' - from example.com/examples/colors.json put into db a map(*) item'
           echo '> xq put example.com/examples/colors.json'
@@ -47,6 +47,11 @@ jobs:
           echo '> xq put example.com/examples/mildred.json'
           xq put example.com/examples/mildred.json
           printf %60s | tr ' ' '-' && echo
+        run: |
+          echo ' - from example.com/content/index.md put into db a XML document-node() item '
+          echo '> xq put example.com/content/index.md'
+          xq put example.com/content/index.md
+          printf %60s | tr ' ' '=' && echo
       - name: Stop running xqerl
         run: | 
           make down
