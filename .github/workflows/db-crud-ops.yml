@@ -52,6 +52,7 @@ jobs:
           xq put example.com/examples/colors.json
           echo '> xq put example.com/examples/mildred.json'
           xq put example.com/examples/mildred.json
+          xq put example.com/content/index.md
       - name: Stop running xqerl
         run: | 
           make down
