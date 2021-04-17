@@ -37,11 +37,6 @@ jobs:
           echo ' -  param {domain-path} is the path from "./src/data"'
           echo ' - a "domain" must be included the {domain-path),'
           echo ' - like "example.com/path-to-resource.xml" or "src/data/example.com/examples/employees.xml"'
-      - name:  put XML documents into db as an document node items
-        run: |
-          echo '> xq put example.com/examples/employees.xml'
-          xq put example.com/examples/employees.xml
-          printf %60s | tr ' ' '-' && echo
       - name:  put JSON documents into db as an  an array or map items
         run: |
           echo ' - from example.com/examples/colors.json put into db a map(*) item'
@@ -52,20 +47,6 @@ jobs:
           echo '> xq put example.com/examples/mildred.json'
           xq put example.com/examples/mildred.json
           printf %60s | tr ' ' '-' && echo
-      - name:  put markdown documents into db as XML document node items
-        run: |
-          echo ' - from example.com/content/index.md put into db a XML document-node() item '
-          echo '> xq put example.com/content/index.md'
-          xq put example.com/content/index.md
-          printf %60s | tr ' ' '=' && echo
-      - name:  put CSV documents into db as array items
-        run: |
-          echo ' - from example.com/examples/exit_entry.csv put into db array(*) item '
-          echo '> xq put example.com/examples/exit_entry.csv'
-          xq put example.com/examples/exit_entry.csv
-          printf %60s | tr ' ' '-' && echo
-
-          
       - name: Stop running xqerl
         run: | 
           make down
