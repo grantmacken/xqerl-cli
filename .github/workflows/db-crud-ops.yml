@@ -11,12 +11,6 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 1
-      - name: Set up local bin
-        run: |
-          mkdir -p $HOME/.local/bin
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
-          pushd $HOME/.local/bin && ln -s ${GITHUB_WORKSPACE}/bin/xq && popd
-          which xq
       - name: Github login in and pull helper github packages
         run: |
           echo ${{ secrets.GITHUB_TOKEN }} | docker login docker.pkg.github.com --username ${GITHUB_ACTOR} --password-stdin &> /dev/null
@@ -39,7 +33,7 @@ jobs:
           echo '> make up'
           make up
           printf %60s | tr ' ' '-' && echo && sleep 2
-      - name: xq commands check
+      - name: xq CRUD database actions 
         run: |
           echo ' - xq CRUD database actions [ put list available get delete link  ] '
           printf %60s | tr ' ' '=' && echo
@@ -47,18 +41,26 @@ jobs:
           echo ' - *data* source starts with a {domain}.'
       - name: xq put
         run: |
-          echo ' - `xq put {data-path}` will store a data source as a db XDM item'
+          echo ' - xq put {data-path} will store a data source as a db XDM item'
           echo '> xq put example.com/examples/employees.xml'
-          xq put example.com/examples/employees.xml
+          bin/xq put example.com/examples/employees.xml
           echo '> xq put example.com/examples/colors.json'
-          xq put example.com/examples/colors.json
+          bin/xq put example.com/examples/colors.json
           echo '> xq put example.com/examples/mildred.json'
-          xq put example.com/examples/mildred.json
+          bin/xq put example.com/examples/mildred.json
       - name: xq list
         run: |
-          echo ' - `xq list {db-path}` lists db resources, including links'
+          echo ' - xq list {db-path} lists db resources, including links'
           echo '> xq list example.com/examples'
-          xq list example.com/examples
+          bin/xq list example.com/examples
+          printf %60s | tr ' ' '-' && echo
+      - name: xq available
+        run: |
+          echo ' - xq available {db-path} returns true or false'
+          echo '> xq available example.com/usecase/colors.array'
+          bin/xq available example.com/examples/colors.json
+          echo '> xq available example.com/examples/nothing.array'
+          xq available example.com/examples/nothing.json
           printf %60s | tr ' ' '-' && echo
       - name: Stop running xqerl
         run: | 

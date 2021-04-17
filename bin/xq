@@ -67,11 +67,11 @@ function dbGetItem() {
       ;;
     array)
      docker exec xq xqerl escript bin/scripts/query.escript \
-        "'$resource' => db:get() => serialize(map{'method': 'json' })" | jq '.'
+        "'$resource' => db:get() => serialize(map{'method': 'json' })"
       ;;
     map)
       docker exec xq xqerl escript bin/scripts/query.escript \
-        "'$resource' => db:get() => serialize(map{'method': 'json' })" | jq '.'
+        "'$resource' => db:get() => serialize(map{'method': 'json' })"
       ;;
     *)
       die "[ $itemType ] unknown XDM item"
