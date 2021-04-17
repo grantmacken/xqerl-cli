@@ -1,11 +1,8 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 IFS=$'\n\t'
-source .env
-XQERL_IMAGE=docker.pkg.github.com/$REPO_OWNER/$REPO_NAME/$RUN_NAME:$GHPKG_VER
-MountAssets="type=volume,target=$XQERL_HOME/priv/static/assets,source=static-assets"
-declare -a args
 
+declare -a args
 args=("$@")
 script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)
 
@@ -20,8 +17,7 @@ function help() { ## show this help	 db-exists)
   awk 'BEGIN {FS = ").*?## "}; {printf "\033[36m%-10s\033[0m %s\n", $1, $2}'
 }
 
-# check required arguments
-[[ ${#args[@]} -eq 0 ]] && help && exit
+
 
 function ok (){
   echo -n "✔  " && echo  $1
@@ -33,6 +29,14 @@ function die() {
   msg "$msg"
   exit "$code"
 }
+
+# check if in project root
+grep -oP '^XQERL_HOME' .env ||  die "you are not call xq from a xQuery project root"
+# check required arguments
+[[ ${#args[@]} -eq 0 ]] && help && exit
+source .env
+XQERL_IMAGE=docker.pkg.github.com/grantmacken/alpine-xqerl/xq:$GHPKG_VER
+MountAssets="type=volume,target=$XQERL_HOME/priv/static/assets,source=static-assets"
 
 function dbDomainExists() {
   local resource="http://$(echo $1 | grep -oP '^(http://)?\K(.+)$')"
@@ -120,22 +124,21 @@ function dbFilePut() {
   local base="$(echo $1 | grep -oP '^(src/data/)?\K(.+)$')"
   local srcFile="src/data/$base"
   [ -e $srcFile ] || die "[ $srcFile ] unknown file"
+  local xqDir="/tmp/$(dirname $base)"
+  xq sh "mkdir -p ${xqDir}"
+  docker cp $srcFile xq:tmp/${base}
   local xqFile="/tmp/$base"
-  docker exec xq ls -al $xqFile &>/dev/null || die "[ $xqFile ] not in running instance, check bind mount"
   local filename=$(basename -- "$srcFile")
   local ext="${filename##*.}"
-  #local filename="${filename%.*}"
-  # echo $1 | grep -oP '/data/' &>/dev/null || die "[ ${args[1]} ] unknown directory"
-  #local target="${1##*/data/}" 
   if echo ${ext} | grep -oP '^(xml|json|csv)$' &>/dev/null
     then  
       docker exec xq xqerl escript bin/scripts/run.escript put-item.xq $base
+      xq sh "rm -r /tmp/*"
   elif echo ${ext} | grep -oP '^(md)$' &>/dev/null
     then
       # markdown as stored as a XDM document node
       # the stored XML document is the result of 
       # running thru a dockerized cmark with the -to xml flag set
-      local dir=$(dirname $base)
       local domain=${dir%%/*}
       local path=${dir##*/}
       local baseName=$(basename  "$base")
