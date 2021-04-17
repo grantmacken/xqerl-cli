@@ -57,11 +57,20 @@ jobs:
       - name: xq available
         run: |
           echo ' - xq available {db-path} returns true or false'
-          echo '> xq available example.com/usecase/colors.array'
+          echo '> xq available example.com/examples/colors.array'
           bin/xq available example.com/examples/colors.json
           echo '> xq available example.com/examples/nothing.array'
           bin/xq available example.com/examples/nothing.json
           printf %60s | tr ' ' '-' && echo
+      - name: xq available
+        run: |
+          echo ' - xq get {db-path} returns a serialized XDM item'
+          echo ' - document-node XDM items will be serialized as XML strings'
+          echo '> xq get example.com/examples/employees.xml'
+          xq get example.com/examples/employees.xml
+          echo ' - array and map XDM items will be serialized as JSON strings'
+          echo '> xq get example.com/examples/colors.array'
+          xq get example.com/examples/colors.array
       - name: Stop running xqerl
         run: | 
           make down
