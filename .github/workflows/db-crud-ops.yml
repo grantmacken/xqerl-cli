@@ -20,7 +20,7 @@ jobs:
       - name: Github login in and pull helper github packages
         run: |
           echo ${{ secrets.GITHUB_TOKEN }} | docker login docker.pkg.github.com --username ${GITHUB_ACTOR} --password-stdin &> /dev/null
-          make pull
+          source .env
           docker pull docker.pkg.github.com/grantmacken/alpine-xqerl/xq:${GHPKG_VER} &> /dev/null
           docker pull docker.pkg.github.com/grantmacken/alpine-scour/scour:0.0.2 &> /dev/null
           docker pull docker.pkg.github.com/grantmacken/alpine-zopfli/zopfli:0.0.1 &> /dev/null
