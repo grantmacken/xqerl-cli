@@ -2,7 +2,7 @@ name: CI
 on: 
   push:
     branches:
-      - 'main'
+      - 'feature'
 jobs:
   xqerl-cli:
     runs-on: ubuntu-latest
