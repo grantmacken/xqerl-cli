@@ -38,6 +38,75 @@ source .env
 XQERL_IMAGE=docker.pkg.github.com/grantmacken/alpine-xqerl/xq:$GHPKG_VER
 MountAssets="type=volume,target=$XQERL_HOME/priv/static/assets,source=static-assets"
 
+#######################
+#  xq db CRUD commands for xqerl db
+# [ put ]  Create a db XDM item from a data src file
+# [ link ] Create - a db link to a binary or unparsed text file
+# [ get ]  Read - db XDM item from a data src file
+# [ list ] Read - list db uri collections
+# [ available ] Read - is db item available
+# TODO! [ type ] Read - what XDM type is the db item is stored as
+# [ update ] Update - use update facility to update XML resource
+# [ delete ] Delete - delete a single XDM or link item
+# [ destroy ] Delete - delete a everythind in db collection
+#######################
+
+function dbFilePut() {
+  local base="$(echo $1 | grep -oP '^(src/data/)?\K(.+)$')"
+  local srcFile="src/data/$base"
+  [ -e $srcFile ] || die "[ $srcFile ] unknown file"
+  local xqDir="/tmp/$(dirname $base)"
+  xq sh "mkdir -p ${xqDir}"
+  docker cp $srcFile xq:tmp/${base}
+  local xqFile="/tmp/$base"
+  local filename=$(basename -- "$srcFile")
+  local ext="${filename##*.}"
+  if echo ${ext} | grep -oP '^(xml|json|csv)$' &>/dev/null
+    then  
+      docker exec xq xqerl escript bin/scripts/run.escript put-item.xq $base
+      xq sh "rm -r /tmp/*"
+  elif echo ${ext} | grep -oP '^(md)$' &>/dev/null
+    then
+      # markdown as stored as a XDM document node
+      # the stored XML document is the result of 
+      # running thru a dockerized cmark with the -to xml flag set
+      local domain=${dir%%/*}
+      local path=${dir##*/}
+      local baseName=$(basename  "$base")
+      local ext="${baseName##*.}"
+      local resource="${baseName%.*}"
+      cat $srcFile | \
+      docker run --rm  --interactive \
+      docker.pkg.github.com/grantmacken/alpine-cmark-gfm/cmark-gfm:0.29.0 \
+      --to xml --sourcepos  --validate-utf8 --smart | \
+      sed -e '1,2d' > "src/data/${dir}/${resource}.cmark"
+        docker exec xq xqerl escript bin/scripts/run.escript put-item.xq ${dir}/${resource}.cmark
+      rm -f src/data/${dir}/${resource}.cmark
+     # docker run --rm  --interactive docker.pkg.github.com/grantmacken/alpine-cmark-gfm/cmark-gfm:0.29.0 --list-extensions 
+  else die "can not handle extension [ $ext ]"
+  fi
+}
+
+function dbDeleteItem() {
+  local resource="http://$(echo $1 | grep -oP '^(http://)?\K(.+)$')"
+  if "$( isDocAvailable $resource )"
+  then
+    docker exec xq xqerl escript bin/scripts/query.escript  "'$resource' => db:delete()"
+    ok "resource deleted from db: [ $resource ]"
+  else 
+    if isAvailable $resource
+      then
+      docker exec xq xqerl escript bin/scripts/query.escript  "'$resource' => db:delete()" &>/dev/null
+      ok "resource deleted from db: [ $resource ]"
+    else
+      die "resource NOT found in db: [ $resource ]"
+    fi
+  fi
+}
+
+
+
+
 function dbDomainExists() {
   local resource="http://$(echo $1 | grep -oP '^(http://)?\K(.+)$')"
  docker exec xq xqerl escript bin/scripts/call.escript \
@@ -120,58 +189,6 @@ function getDoc() {
     "'$1' => doc() => serialize(map{'omit-xml-declaration': true() })"
 }
 
-function dbFilePut() {
-  local base="$(echo $1 | grep -oP '^(src/data/)?\K(.+)$')"
-  local srcFile="src/data/$base"
-  [ -e $srcFile ] || die "[ $srcFile ] unknown file"
-  local xqDir="/tmp/$(dirname $base)"
-  xq sh "mkdir -p ${xqDir}"
-  docker cp $srcFile xq:tmp/${base}
-  local xqFile="/tmp/$base"
-  local filename=$(basename -- "$srcFile")
-  local ext="${filename##*.}"
-  if echo ${ext} | grep -oP '^(xml|json|csv)$' &>/dev/null
-    then  
-      docker exec xq xqerl escript bin/scripts/run.escript put-item.xq $base
-      xq sh "rm -r /tmp/*"
-  elif echo ${ext} | grep -oP '^(md)$' &>/dev/null
-    then
-      # markdown as stored as a XDM document node
-      # the stored XML document is the result of 
-      # running thru a dockerized cmark with the -to xml flag set
-      local domain=${dir%%/*}
-      local path=${dir##*/}
-      local baseName=$(basename  "$base")
-      local ext="${baseName##*.}"
-      local resource="${baseName%.*}"
-      cat $srcFile | \
-      docker run --rm  --interactive \
-      docker.pkg.github.com/grantmacken/alpine-cmark-gfm/cmark-gfm:0.29.0 \
-      --to xml --sourcepos  --validate-utf8 --smart | \
-      sed -e '1,2d' > "src/data/${dir}/${resource}.cmark"
-        docker exec xq xqerl escript bin/scripts/run.escript put-item.xq ${dir}/${resource}.cmark
-      rm -f src/data/${dir}/${resource}.cmark
-     # docker run --rm  --interactive docker.pkg.github.com/grantmacken/alpine-cmark-gfm/cmark-gfm:0.29.0 --list-extensions 
-  else die "can not handle extension [ $ext ]"
-  fi
-}
-
-function dbDeleteItem() {
-  local resource="http://$(echo $1 | grep -oP '^(http://)?\K(.+)$')"
-  if "$( isDocAvailable $resource )"
-  then
-    docker exec xq xqerl escript bin/scripts/query.escript  "'$resource' => db:delete()"
-    ok "resource deleted from db: [ $resource ]"
-  else 
-    if isAvailable $resource
-      then
-      docker exec xq xqerl escript bin/scripts/query.escript  "'$resource' => db:delete()" &>/dev/null
-      ok "resource deleted from db: [ $resource ]"
-    else
-      die "resource NOT found in db: [ $resource ]"
-    fi
-  fi
-}
 
 function dbDeleteCollection() { 
  echo 'TODO'
