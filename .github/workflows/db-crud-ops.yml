@@ -52,17 +52,7 @@ jobs:
           xq put example.com/examples/colors.json
           echo '> xq put example.com/examples/mildred.json'
           xq put example.com/examples/mildred.json
-      - name: xq link
-        run: |
-          echo ' - xq CRUD database actions [ put list available get delete link  ] '
-          echo ' - all *static asset* sources are located in the "./src/static-assets/" directory'
-          echo ' - `xq link {domain} {path}` will store db link to a static asset file'
-          echo '> xq link example.com icons/article.svg'
-          xq link example.com icons/article.svg
-          echo '> xq link example.com icons/article.svg'
-          xq link example.com icons/article.svg
-          echo '> xq link example.com icons/note.svg'
-          xq link example.com icons/note.svg
+
       - name: Stop running xqerl
         run: | 
           make down
