@@ -47,6 +47,7 @@ jobs:
           echo '> xq put example.com/examples/mildred.json'
           xq put example.com/examples/mildred.json
           printf %60s | tr ' ' '-' && echo
+      - name:  put markdown documents into db as XML document node items
         run: |
           echo ' - from example.com/content/index.md put into db a XML document-node() item '
           echo '> xq put example.com/content/index.md'
