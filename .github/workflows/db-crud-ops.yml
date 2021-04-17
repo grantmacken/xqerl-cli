@@ -60,7 +60,7 @@ jobs:
           echo '> xq available example.com/usecase/colors.array'
           bin/xq available example.com/examples/colors.json
           echo '> xq available example.com/examples/nothing.array'
-          xq available example.com/examples/nothing.json
+          bin/xq available example.com/examples/nothing.json
           printf %60s | tr ' ' '-' && echo
       - name: Stop running xqerl
         run: | 
