@@ -21,17 +21,24 @@ jobs:
         run: |
           echo ${{ secrets.GITHUB_TOKEN }} | docker login docker.pkg.github.com --username ${GITHUB_ACTOR} --password-stdin &> /dev/null
           make pull
+          docker pull docker.pkg.github.com/grantmacken/alpine-xqerl/xq:${GHPKG_VER} &> /dev/null
+          docker pull docker.pkg.github.com/grantmacken/alpine-scour/scour:0.0.2 &> /dev/null
+          docker pull docker.pkg.github.com/grantmacken/alpine-zopfli/zopfli:0.0.1 &> /dev/null
+          docker pull docker.pkg.github.com/grantmacken/alpine-cmark-gfm/cmark-gfm:0.29.0 &> /dev/null
+          echo -n ' - check available: '
+          docker images | grep -oP 'alpine-xqerl'
+          echo -n ' - check available: '
+          docker images | grep -oP 'alpine-scour'
           echo -n ' - check available: '
           docker images | grep -oP 'alpine-zopfli'
+          echo -n ' - check available: '
+          docker images | grep -oP 'alpine-cmark-gfm'
       - name: Start running xqerl in a container
         run: |
           printf %60s | tr ' ' '-' && echo
           echo '> make'
           make up
           printf %60s | tr ' ' '-' && echo
-          xq put example.com/examples/employees.xml
-          xq put example.com/examples/colors.json
-          xq put example.com/examples/mildred.json
       - name: Stop running xqerl
         run: | 
           make down

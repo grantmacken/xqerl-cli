@@ -26,9 +26,10 @@ jobs:
       - name: Github login in and pull helper github packages
         run: |
           echo ${{ secrets.GITHUB_TOKEN }} | docker login docker.pkg.github.com --username ${GITHUB_ACTOR} --password-stdin &> /dev/null
-          make pull
+          source .env
+          docker pull docker.pkg.github.com/grantmacken/alpine-xqerl/xq:${GHPKG_VER} &> /dev/null
           echo -n ' - check available: '
-          docker images | grep -oP 'alpine-zopfli'
+          docker images | grep -oP 'alpine-xqerl'
       - name: Start running xqerl in a container
         run: |
           printf %60s | tr ' ' '-' && echo
