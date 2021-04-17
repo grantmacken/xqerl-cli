@@ -39,6 +39,19 @@ jobs:
           echo '> make'
           make up
           printf %60s | tr ' ' '-' && echo
+      - name: xq commands check
+        run: |
+          echo ' - xq CRUD database actions [ put list available get delete link  ] '
+          printf %60s | tr ' ' '=' && echo
+          echo ' - all *data* sources are located in the "./src/data/" directory'
+          echo ' - *data* source starts with a {domain}.'
+          echo ' - `xq put {data-path}` will store a data source as a db XDM item'
+          echo '> xq put example.com/examples/employees.xml'
+          xq put example.com/examples/employees.xml
+          echo '> xq put example.com/examples/colors.json'
+          xq put example.com/examples/colors.json
+          echo '> xq put example.com/examples/mildred.json'
+          xq put example.com/examples/mildred.json
       - name: Stop running xqerl
         run: | 
           make down
