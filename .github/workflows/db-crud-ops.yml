@@ -76,7 +76,7 @@ jobs:
         run: |
           echo '- xq delete {db-path} deletes XDM item from the db'
           echo '> xq delete example.com/examples/employees.xml'
-          xq delete example.com/examples/employees.xml
+          bin/xq delete example.com/examples/employees.xml
           printf %60s | tr ' ' '-' && echo
       - name: Stop running xqerl
         run: | 
