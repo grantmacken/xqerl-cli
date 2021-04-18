@@ -65,9 +65,12 @@ jobs:
           printf %60s | tr ' ' '-' && echo
       - name: update rename
         run: |
-          echo ' - xq get {db-path} returns a serialized XDM item'
-          echo ' - document-node XDM items will be serialized as XML strings'
-          echo '> xq update example.com/examples/employees.xml '/employees/employee[1]/email' rename node 'gmail'
+          echo ' - xq update {uri} {xpath} {key} {qualifier} {what}'
+          echo ' - consists of'
+          echo '   1: selection part: {uri} {xpath}  '
+          echo '   2: update part: {key} {qualifier} {what}'
+          echo '  where {key} is the update keyword [ insert | delete , replace | rename ]'
+          echo "> xq update example.com/examples/employees.xml '/employees/employee[1]/email' rename node 'gmail'"
           xq update example.com/examples/employees.xml '/employees/employee[1]/email' rename node 'gmail'
           sleep 1
           xq get example.com/examples/employees.xml
