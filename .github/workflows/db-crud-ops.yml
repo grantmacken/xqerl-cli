@@ -24,6 +24,12 @@ jobs:
           #docker images | grep -oP 'alpine-zopfli'
           #echo -n ' - check available: '
           #docker images | grep -oP 'alpine-cmark-gfm'
+      - name: Set up local bin
+        run: |
+          mkdir -p $HOME/.local/bin
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          pushd $HOME/.local/bin && ln -s ${GITHUB_WORKSPACE}/bin/xq && popd
+          which xq
       - name: Start running xqerl in a container
         run: |
           printf %60s | tr ' ' '-' && echo
@@ -34,12 +40,12 @@ jobs:
         run: |
           echo ' - xq put {data-path} will store a data source as a db XDM item'
           echo '> xq put example.com/examples/employees.xml'
-          bin/xq put example.com/examples/employees.xml
+          xq put example.com/examples/employees.xml
       - name: xq list
         run: |
           echo ' - xq list {db-path} lists db resources, including links'
           echo '> xq list example.com/examples'
-          bin/xq list example.com/examples
+          xq list example.com/examples
           printf %60s | tr ' ' '-' && echo
       - name: xq available
         run: |
@@ -47,12 +53,24 @@ jobs:
           echo '> example.com/examples/employees.xml'
           bin/xq available example.com/examples/employees.xml
           printf %60s | tr ' ' '-' && echo
-      - name: xq get
+      - name: get
         run: |
           echo ' - xq get {db-path} returns a serialized XDM item'
           echo ' - document-node XDM items will be serialized as XML strings'
           echo '> xq get example.com/examples/employees.xml'
-          bin/xq get example.com/examples/employees.xml
+          xq get example.com/examples/employees.xml
+          #echo ' - array and map XDM items will be serialized as JSON strings'
+          #echo '> xq get example.com/examples/colors.array'
+          #bin/xq get example.com/examples/colors.array
+          printf %60s | tr ' ' '-' && echo
+      - name: update rename
+        run: |
+          echo ' - xq get {db-path} returns a serialized XDM item'
+          echo ' - document-node XDM items will be serialized as XML strings'
+          echo '> xq update example.com/examples/employees.xml '/employees/employee[1]/email' rename node 'gmail'
+          xq update example.com/examples/employees.xml '/employees/employee[1]/email' rename node 'gmail'
+          sleep 1
+          xq get example.com/examples/employees.xml
           #echo ' - array and map XDM items will be serialized as JSON strings'
           #echo '> xq get example.com/examples/colors.array'
           #bin/xq get example.com/examples/colors.array
