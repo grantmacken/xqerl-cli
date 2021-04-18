@@ -73,7 +73,7 @@ http://markup.nz`   # database 2
 
 Each database contains collections of items referenced as URIs.
 
-- db **base** uri: http://example.com => 
+- db **base** uri: http://example.com 
 - db **collection**  http://example/examples  
 - db **item** http://example/examples/employees.xml 
 
@@ -85,7 +85,6 @@ The xqerl database can store
 
 2. links A db *link* is a reference to binary or unparsed text file on the containers file system
 
-
 ## xqerl database CRUD operations with `xq`
 
 Create Read Update Delete
@@ -94,7 +93,7 @@ Create Read Update Delete
 
 Given a path argument, 
 the put command stores a file as a XDM item into the database, 
-then return the location of the stored file
+then returns the location of the stored file
 
 By convention all the data source are in the src/data directory
 so the path can either start with a 'domain' name 
