@@ -17,16 +17,20 @@ you can use as a template when creating xQuery projects.
 ## WIP xq commands 
 
 xq Create Read Update Delete (CRUD) commands for working with xqerl database
- - [x] `xq put {srcFile}` given *srcFile*, **create** a db XDM item then return db location URI 
- - [x] `xq put {srcFile}` given *domain* and *srcFile*, **create** a db link to a binary or unparsed text file then return db location URI 
+ - [x] `xq put {srcFile}` given *srcFile*, **create** a db XDM item then return 
+db location URI 
+ - [x] `xq link {srcFile}` given *domain* and *srcFile*, **create** a db link 
+to a binary or unparsed text file then return db location URI 
  - [x] `xq get {db-uri}` given *db-uri*, return serialized db XDM item
  - [x] `xq list {db-uri}` given *db-uri*, return uri list of db resources
  - [x] `xq available {db-uri}` given *db-uri*, return true or false
  - [ ] `xq type {db-uri}` given *db-uri*, return the db XDM type
- - [ ] `xq update {db-uri} {update-expression}` given *db-uri* and *update-expression*, **update** XML resource, then return true or false
- - [x] `xq delete {db-uri}` given *db-uri*, **delete** item, then return true or false
- - [ ] `xq delete {db-uri}` given *db-uri*, **destroy** everything in db collection, then return true or false
-
+ - [ ] `xq update {db-uri} {update-expression}` given *db-uri* and 
+*update-expression*, **update** XML resource, then return true or false
+ - [x] `xq delete {db-uri}` given *db-uri*, **delete** item, then return true 
+or false
+ - [ ] `xq destroy {db-uri}` given *db-uri*, **destroy** everything in db 
+collection, then return true or false
 
 # Getting Started
 
@@ -57,37 +61,66 @@ that communicates with the running *xq* container.
 
 ## The xqerl database intro
 
-Although xqerl database promotes itself a XML database is much more.
-It is in reality a database for any
-[ XQuery and XPath Data items](https://www.w3.org/TR/xpath-datamodel-31/) (**XDM**).
+The xqerl database engine can handle multiple base-URI databases.
+A base-URI is schema plus domain `{schema}://{domain}`).
+example `http://example.com`.
+Each each base-URI constitutes a separate database.
 
-As well as XDM items the database can store **link** items.
-A db *link* is a reference to binary or unparsed text file on the containers file system
+```
+http://example.com` # database 1
+http://markup.nz`   # database 2
+```
+
+Each database contains collections of items referenced as URIs.
+
+- db **base** uri: http://example.com => 
+- db **collection**  http://example/examples  
+- db **item** http://example/examples/employees.xml 
+
+## db items
+
+The xqerl database can store 
+
+1. [ XQuery and XPath Data Model](https://www.w3.org/TR/xpath-datamodel-31/) (**XDM**) items. These include document-nodes, arrays, maps and functions
+
+2. links A db *link* is a reference to binary or unparsed text file on the containers file system
+
 
 ## xqerl database CRUD operations with `xq`
 
 Create Read Update Delete
 
-## `xq put {path}` 
+### `xq put {path}`
 
-This command stores a file as a XDM item in the database.
+Given a path argument, 
+the put command stores a file as a XDM item into the database, 
+then return the location of the stored file
 
-By convention we use the following directory structure to hold `src/data` files.
+By convention all the data source are in the src/data directory
+so the path can either start with a 'domain' name 
+e.g. example.com/examples/employees.xml or use the full path src/data/example.com/examples/employees.xml.
+What ever the case the path must include the domain name, as the domain name becomes the base-uri 
+part of the db stored location uri
 
 ```
 .
 └── src
     ├── data
-    │   └── example.com
-    │       ├── content
-    │       │   ├── index.md
-    │       │   └── why-xqerl.md
-    │       └── usecase
-    │           ├── colors.json
-    │           ├── employees.xml
-    │           └── mildred.json
+    │   └── example.com           -> *base uri*: http://example 
+    │       └── examples          -> *collection uri*: http://example/examples    
+    │           ├── employees.xml -> *item uri*: http://example/examples/employees.xml
+```
+
 
 ```
+> xq put example.com/examples/employees.xml
+ - ok: stored into db
+ - XDM item: document-node
+ - location: http://example.com/examples/employees.xml
+ ```
+
+
+
 
  ## TODO!
 
