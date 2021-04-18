@@ -17,8 +17,6 @@ function help() { ## show this help	 db-exists)
   awk 'BEGIN {FS = ").*?## "}; {printf "\033[36m%-10s\033[0m %s\n", $1, $2}'
 }
 
-
-
 function ok (){
   echo -n "✔  " && echo  $1
 }
@@ -31,7 +29,8 @@ function die() {
 }
 
 # check if in project root
-grep -oP '^XQERL_HOME' .env ||  die "you are not call xq from a xQuery project root"
+
+grep -oP '^XQERL_HOME' .env &>/dev/null || die "you are not call xq from a xQuery project root"
 # check required arguments
 [[ ${#args[@]} -eq 0 ]] && help && exit
 source .env
@@ -40,17 +39,10 @@ MountAssets="type=volume,target=$XQERL_HOME/priv/static/assets,source=static-ass
 
 #######################
 #  xq db CRUD commands for xqerl db
-# [ put ]  Create a db XDM item from a data src file
-# [ link ] Create - a db link to a binary or unparsed text file
-# [ get ]  Read - db XDM item from a data src file
-# [ list ] Read - list db uri collections
-# [ available ] Read - is db item available
-# TODO! [ type ] Read - what XDM type is the db item is stored as
-# [ update ] Update - use update facility to update XML resource
-# [ delete ] Delete - delete a single XDM or link item
-# [ destroy ] Delete - delete a everythind in db collection
 #######################
 
+
+# [ put {srcFile} ]  Create a db XDM item from a data src file
 function dbFilePut() {
   local base="$(echo $1 | grep -oP '^(src/data/)?\K(.+)$')"
   local srcFile="src/data/$base"
@@ -87,136 +79,7 @@ function dbFilePut() {
   fi
 }
 
-function dbDeleteItem() {
-  local resource="http://$(echo $1 | grep -oP '^(http://)?\K(.+)$')"
-  if "$( isDocAvailable $resource )"
-  then
-    docker exec xq xqerl escript bin/scripts/query.escript  "'$resource' => db:delete()"
-    ok "resource deleted from db: [ $resource ]"
-  else 
-    if isAvailable $resource
-      then
-      docker exec xq xqerl escript bin/scripts/query.escript  "'$resource' => db:delete()" &>/dev/null
-      ok "resource deleted from db: [ $resource ]"
-    else
-      die "resource NOT found in db: [ $resource ]"
-    fi
-  fi
-}
-
-
-
-
-function dbDomainExists() {
-  local resource="http://$(echo $1 | grep -oP '^(http://)?\K(.+)$')"
- docker exec xq xqerl escript bin/scripts/call.escript \
-    "xqldb_db_server"  "exists" "$resource"
- #docker exec xq xqerl escript bin/scripts/call.escript "xqldb_lib"  "filename_to_uri" "/tmp/markup.nz"
-  }
-
-function dbItemType() {
-  docker exec xq xqerl escript bin/scripts/run.escript \
-    db-item-type.xq $1
-  }
-
-function dbGetLink() {
-  local local resource="http://$(echo $1 | grep -oP '^(http://)?\K(.+)$')"
-  local collection=$(dirname $resource)
-  if [ -n "$(dbList $collection | grep -oP "^${resource}$")" ]
-    then
-    ok "resource in db: [ $resource ]"
-    docker exec xq xqerl escript bin/scripts/query.escript  "'$resource' => db:get()" 
-  else
-    die "resource NOT found in db: [ $resource ]"
-  fi
-}
-
-function dbGetItem() {
-  local resource="http://$(echo $1 | grep -oP '^(http://)?\K(.+)$')"
-  local itemType=$(dbItemType $resource)
-  case "$itemType" in
-    document-node)
-      docker exec xq xqerl escript bin/scripts/query.escript "'$resource' => doc() => serialize(map{'omit-xml-declaration': true() })"
-      ;;
-    array)
-     docker exec xq xqerl escript bin/scripts/query.escript \
-        "'$resource' => db:get() => serialize(map{'method': 'json' })"
-      ;;
-    map)
-      docker exec xq xqerl escript bin/scripts/query.escript \
-        "'$resource' => db:get() => serialize(map{'method': 'json' })"
-      ;;
-    *)
-      die "[ $itemType ] unknown XDM item"
-  esac
-}
-
-function dbList() {
-  local path="http://$(echo $1 | grep -oP '^(http://)?\K(.+)$')"
-  docker exec xq xqerl escript bin/scripts/query.escript \
-    "try { ('$path' => uri-collection()) => string-join('&#10;') } catch * {()}" 
-}
-
-function doCall() {
-  docker exec xq xqerl escript bin/scripts/call.escript \
-    "$1" "$2" "$3"
-  }
-
-function isDocAvailable() {
-  docker exec xq xqerl escript bin/scripts/query.escript \
-  "'$1' => doc-available() => string()"
-}
-
-function isAvailable() {
-  local resource="http://$(echo $1 | grep -oP '^(http://)?\K(.+)$')"
-  echo $resource
-  docker exec xq xqerl escript bin/scripts/query.escript \
-    "( '$resource' = ( remove( \
-        '$resource' => \
-        tokenize('/'),'$resource' => \
-        tokenize('/') => \
-        count()\
-        )\
-      ) => \
-      string-join('/')  => \
-      string() => \
-      uri-collection()\
-    ) => string()"
-}
-
-function getDoc() {
-  docker exec xq xqerl escript bin/scripts/query.escript \
-    "'$1' => doc() => serialize(map{'omit-xml-declaration': true() })"
-}
-
-
-function dbDeleteCollection() { 
- echo 'TODO'
-}
-
-function doCompile() { 
-  local base="$(echo $1 | grep -oP '^(src/(main_modules|library_modules)/)?\K(.+)$')"
-  if [ -e src/main_modules/$base ] ;then  
-   docker cp src/main_modules/$base xq:/usr/local/xqerl/code/src/$base 
-  else 
-    if [ -e src/library_modules/$base ] ; then
-      docker cp src/library_modules/$base xq:/usr/local/xqerl/code/src/$base 
-    else die "[ $1 ] unknown file"
-    fi
-  fi
-  docker exec xq xqerl escript bin/scripts/compile.escript  "code/src/$base"
-}
-
-function doRun() { 
-  local base="$(echo $1 | grep -oP '^(src/main_modules/)?\K(.+)$')"
-  local srcFile="src/main_modules/$base"
-  [ -e $srcFile ] || die "[ $srcFile ] unknown file"
-  docker cp $srcFile xq:/usr/local/xqerl/code/src/$base 
-  docker exec xq xqerl escript bin/scripts/run.escript  $1 "$2"
-}
-
-#xqerl_update:add(Ctx, {put, link, Filename, DB, Name}).
-
+# [ link ] Create - a db link to a binary or unparsed text file
 function dbLink() {
   local domain=$1
   local base="$(echo $2 | grep -oP '^(src/static_assets/)?\K(.+)$')"
@@ -249,6 +112,151 @@ function dbLink() {
   esac
 }
 
+# utility for Read actions
+function dbItemType() {
+  docker exec xq xqerl escript bin/scripts/run.escript \
+    db-item-type.xq $1
+  }
+
+# [ get ]  Read - given uri get db XDM item
+function dbGetItem() {
+  local resource="http://$(echo $1 | grep -oP '^(http://)?\K(.+)$')"
+  local itemType=$(dbItemType $resource)
+  case "$itemType" in
+    document-node)
+      docker exec xq xqerl escript bin/scripts/query.escript "'$resource' => doc() => serialize(map{'omit-xml-declaration': true() })"
+      ;;
+    array)
+     docker exec xq xqerl escript bin/scripts/query.escript \
+        "'$resource' => db:get() => serialize(map{'method': 'json' })"
+      ;;
+    map)
+      docker exec xq xqerl escript bin/scripts/query.escript \
+        "'$resource' => db:get() => serialize(map{'method': 'json' })"
+      ;;
+    *)
+      die "[ $itemType ] unknown XDM item"
+  esac
+}
+
+# TODO  [ get ]  Read - db link 
+function dbGetLink() {
+  local local resource="http://$(echo $1 | grep -oP '^(http://)?\K(.+)$')"
+  local collection=$(dirname $resource)
+  if [ -n "$(dbList $collection | grep -oP "^${resource}$")" ]
+    then
+    ok "resource in db: [ $resource ]"
+    docker exec xq xqerl escript bin/scripts/query.escript  "'$resource' => db:get()" 
+  else
+    die "resource NOT found in db: [ $resource ]"
+  fi
+}
+
+
+
+# [ list ] Read - list db uri collections
+function dbList() {
+  local path="http://$(echo $1 | grep -oP '^(http://)?\K(.+)$')"
+  docker exec xq xqerl escript bin/scripts/query.escript \
+    "try { ('$path' => uri-collection()) => string-join('&#10;') } catch * {()}" 
+}
+
+# [ available ] Read - is db item available
+function isAvailable() {
+  local resource="http://$(echo $1 | grep -oP '^(http://)?\K(.+)$')"
+  docker exec xq xqerl escript bin/scripts/query.escript \
+    "( '$resource' = ( remove( \
+        '$resource' => \
+        tokenize('/'),'$resource' => \
+        tokenize('/') => \
+        count()\
+        )\
+      ) => \
+      string-join('/')  => \
+      string() => \
+      uri-collection()\
+    ) => string()"
+}
+
+function dbUpdate() {
+  local resource="http://$(echo $1 | grep -oP '^(http://)?\K(.+)$')"
+  if isDocAvailable $resource &> /dev/null
+  then
+    docker exec xq xqerl escript bin/scripts/query.escript \
+      "'$resource' => doc() => serialize()"
+    else die "xQuery update facilty only available for XML documents[ $ext ]"
+  fi
+}
+
+
+# [ delete ] Delete - delete a single XDM or link item
+function dbDeleteItem() {
+  local resource="http://$(echo $1 | grep -oP '^(http://)?\K(.+)$')"
+  if "$( isDocAvailable $resource )"
+  then
+    docker exec xq xqerl escript bin/scripts/query.escript  "'$resource' => db:delete()"
+    ok "resource deleted from db: [ $resource ]"
+  else 
+    if isAvailable $resource
+      then
+      docker exec xq xqerl escript bin/scripts/query.escript  "'$resource' => db:delete()" &>/dev/null
+      ok "resource deleted from db: [ $resource ]"
+    else
+      die "resource NOT found in db: [ $resource ]"
+    fi
+  fi
+}
+
+function dbDomainExists() {
+  local resource="http://$(echo $1 | grep -oP '^(http://)?\K(.+)$')"
+ docker exec xq xqerl escript bin/scripts/call.escript \
+    "xqldb_db_server"  "exists" "$resource"
+ #docker exec xq xqerl escript bin/scripts/call.escript "xqldb_lib"  "filename_to_uri" "/tmp/markup.nz"
+  }
+
+function doCall() {
+  docker exec xq xqerl escript bin/scripts/call.escript \
+    "$1" "$2" "$3"
+  }
+# utility: available XML docs
+function isDocAvailable() {
+  docker exec xq xqerl escript bin/scripts/query.escript \
+  "try {'$1' => doc-available() => string()} catch * { 'false' }"
+}
+
+function getDoc() {
+  docker exec xq xqerl escript bin/scripts/query.escript \
+    "'$1' => doc() => serialize(map{'omit-xml-declaration': true() })"
+}
+
+function dbDeleteCollection() { 
+ echo 'TODO'
+}
+
+function doCompile() { 
+  local base="$(echo $1 | grep -oP '^(src/(main_modules|library_modules)/)?\K(.+)$')"
+  if [ -e src/main_modules/$base ] ;then  
+   docker cp src/main_modules/$base xq:/usr/local/xqerl/code/src/$base 
+  else 
+    if [ -e src/library_modules/$base ] ; then
+      docker cp src/library_modules/$base xq:/usr/local/xqerl/code/src/$base 
+    else die "[ $1 ] unknown file"
+    fi
+  fi
+  docker exec xq xqerl escript bin/scripts/compile.escript  "code/src/$base"
+}
+
+function doRun() { 
+  local base="$(echo $1 | grep -oP '^(src/main_modules/)?\K(.+)$')"
+  local srcFile="src/main_modules/$base"
+  [ -e $srcFile ] || die "[ $srcFile ] unknown file"
+  docker cp $srcFile xq:/usr/local/xqerl/code/src/$base 
+  docker exec xq xqerl escript bin/scripts/run.escript  $1 "$2"
+}
+
+#xqerl_update:add(Ctx, {put, link, Filename, DB, Name}).
+
+
 function doRec() {
   local uri="$1"
   local xpath="$2"
@@ -265,6 +273,20 @@ function doLookup() {
     "try{('${uri}' => json-doc())${lookup} } catch * {()}" 
 }
 
+function doRename() {
+    echo "document uri: $resource"
+    echo "xpath selection: $xpath"
+    echo "update keyword: $kw"
+    echo "update qualifier: $qualifier"
+    echo "update what: $what"
+  docker exec xq xqerl escript bin/scripts/pipe.escript \
+"declare %updating function local:update(){
+ for \$var in ('${resource}' => doc())${xpath}
+ return 
+  $kw $qualifier (\$var) as '$what'
+}; 
+try{ local:update() } catch * {false()}"
+}
 case "${args[0]}" in
   put) ## {domain}/{path} create xdm item from file. example: `xq put example.com/usecase/employees.xml`
     dbFilePut ${args[1]}
@@ -276,16 +298,77 @@ case "${args[0]}" in
     isAvailable "${args[1]}"
     ;;
   get) ## {domain}/{path} retrieve and serialize resource . example: `xq get example.com/usecase/employees.xml`
-   res="${args[1]}"
-   base=$(basename -- "$res")
-   ext="${base##*.}"
-  #  local regItem="^(xml|array|map)$"
-  if echo ${ext} | grep -oP '^(svgz)$' &>/dev/null
+    res="${args[1]}"
+    base=$(basename -- "$res")
+    ext="${base##*.}"
+    #  local regItem="^(xml|array|map)$"
+    if echo ${ext} | grep -oP '^(svgz)$' &>/dev/null
     then dbGetLink ${res}
-  elif echo ${ext} | grep -oP '^(cmark|article|xml|array|map)$' &>/dev/null
+    elif echo ${ext} | grep -oP '^(cmark|article|xml|array|map)$' &>/dev/null
     then dbGetItem ${res}
-  else die "can not handle extension [ $ext ]"
-  fi
+    else die "can not handle extension [ $ext ]"
+    fi
+    ;;
+  update) ## {db-uri} {xpath-expression} {update-expression} update XML db resource
+    # example
+    # this will be a updating function
+    # for $var in ('http://example.com/examples/employees.xml' => doc())/employees/employee[1]  (: selection :)
+    # return rename node ($var) as "employee1    (: update :)
+    #############################################################
+    # for $var in ('${uri}' => doc())${xpath}  (: selection :)
+    # return ${kw} ${qualifier} ($var) as {what}    (: update :)
+    # xq update 
+    # selection part: {uri} {xpath}
+    # update part: {kw} {qualifier} {what}
+    # xq update example.com/examples/employees.xml '/employees/employee[1]' rename node 'employee1'
+    resource="http://$(echo ${args[1]} | grep -oP '^(http://)?\K(.+)$')"
+    isDocAvailable "${resource}" &> /dev/null || die ' doc not available'
+    xpath="${args[2]}"
+    kw="${args[3]}"
+    qualifier="${args[4]}"
+    what="${args[5]}"
+  #  [[ ${#args[@]} -eq 5 ]] || \
+  # die 'params \
+  # xq {update} \n 
+  # 1 insert [node|nodes] \n
+  # 1 delete [node|nodes] \n
+  # 1 replace [node|value of node]\n
+  # 1 rename node - a single element or attr'
+    case "$kw" in
+      insert)
+        echo 'insert'
+        case "${qualifier}" in
+          node)
+            echo 'node'
+            ;;         
+          nodes)
+            echo 'nodes'
+            ;;         
+            *)
+            die 'sub cmds are insert [ node | nodes ]'
+        esac
+        ;;
+      delete)
+        echo 'delete'
+        ;;
+      replace)
+        echo 'replace'
+        ;;
+      replace-content)
+        echo 'replace-content'
+        ;;
+      rename)
+        case "${qualifier}" in
+          node)
+          doRename            
+          ;;         
+            *)
+            die 'sub cmds are insert [ node ]'
+        esac
+        ;;
+        *)
+        die 'sub cmds are [ insert | delete | replace | replace-content | rename  ]'
+    esac
     ;;
   delete) ## {domain}/{path} delete resource from db. example: `xq delete example.com/static-assets/icons/article.svg`
    dbDeleteItem "${args[1]}"

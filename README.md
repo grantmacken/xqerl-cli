@@ -13,6 +13,21 @@ building microservices and modern data driven websites.
 This repo also a provides a simple directory structure,
 you can use as a template when creating xQuery projects.
 
+
+## WIP xq commands 
+
+xq Create Read Update Delete (CRUD) commands for working with xqerl database
+ - [x] `xq put {srcFile}` given *srcFile*, **create** a db XDM item then return db location URI 
+ - [x] `xq put {srcFile}` given *domain* and *srcFile*, **create** a db link to a binary or unparsed text file then return db location URI 
+ - [x] `xq get {db-uri}` given *db-uri*, return serialized db XDM item
+ - [x] `xq list {db-uri}` given *db-uri*, return uri list of db resources
+ - [x] `xq available {db-uri}` given *db-uri*, return true or false
+ - [ ] `xq type {db-uri}` given *db-uri*, return the db XDM type
+ - [ ] `xq update {db-uri} {update-expression}` given *db-uri* and *update-expression*, **update** XML resource, then return true or false
+ - [x] `xq delete {db-uri}` given *db-uri*, **delete** item, then return true or false
+ - [ ] `xq delete {db-uri}` given *db-uri*, **destroy** everything in db collection, then return true or false
+
+
 # Getting Started
 
 ```
