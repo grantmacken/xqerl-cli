@@ -2,7 +2,7 @@ name: db_crud_ops
 on: 
   push:
     branches:
-      - 'db'
+      - 'xq-update'
 jobs:
   xqerl-cli-crud-ops:
     runs-on: ubuntu-latest
@@ -16,42 +16,25 @@ jobs:
           echo ${{ secrets.GITHUB_TOKEN }} | docker login docker.pkg.github.com --username ${GITHUB_ACTOR} --password-stdin &> /dev/null
           source .env
           docker pull docker.pkg.github.com/grantmacken/alpine-xqerl/xq:${GHPKG_VER} &> /dev/null
-          docker pull docker.pkg.github.com/grantmacken/alpine-scour/scour:0.0.2 &> /dev/null
-          docker pull docker.pkg.github.com/grantmacken/alpine-zopfli/zopfli:0.0.1 &> /dev/null
-          docker pull docker.pkg.github.com/grantmacken/alpine-cmark-gfm/cmark-gfm:0.29.0 &> /dev/null
           echo -n ' - check available: '
           docker images | grep -oP 'alpine-xqerl'
-          echo -n ' - check available: '
-          docker images | grep -oP 'alpine-scour'
-          echo -n ' - check available: '
-          docker images | grep -oP 'alpine-zopfli'
-          echo -n ' - check available: '
-          docker images | grep -oP 'alpine-cmark-gfm'
+          #echo -n ' - check available: '
+          #docker images | grep -oP 'alpine-scour'
+          #echo -n ' - check available: '
+          #docker images | grep -oP 'alpine-zopfli'
+          #echo -n ' - check available: '
+          #docker images | grep -oP 'alpine-cmark-gfm'
       - name: Start running xqerl in a container
         run: |
           printf %60s | tr ' ' '-' && echo
           echo '> make up'
           make up
           printf %60s | tr ' ' '-' && echo && sleep 2
-      - name: xq CRUD database actions 
-        run: |
-          echo ' - xq CRUD database actions [ put list available get delete link  ] '
-          printf %60s | tr ' ' '=' && echo
-          echo ' - all *data* sources are located in the "./src/data/" directory'
-          echo ' - *data* source starts with a {domain}.'
       - name: xq put
         run: |
           echo ' - xq put {data-path} will store a data source as a db XDM item'
           echo '> xq put example.com/examples/employees.xml'
           bin/xq put example.com/examples/employees.xml
-          echo '> xq put example.com/examples/colors.json'
-          bin/xq put example.com/examples/colors.json
-          echo '> xq put example.com/examples/mildred.json'
-          bin/xq put example.com/examples/mildred.json
-          echo '> xq put example.com/content/index.md'
-          bin/xq put example.com/content/index.md
-          echo '> xq put example.com/examples/exit_entry.csv'
-          xq put example.com/examples/exit_entry.csv
       - name: xq list
         run: |
           echo ' - xq list {db-path} lists db resources, including links'
@@ -61,10 +44,8 @@ jobs:
       - name: xq available
         run: |
           echo ' - xq available {db-path} returns true or false'
-          echo '> xq available example.com/examples/colors.array'
-          bin/xq available example.com/examples/colors.json
-          echo '> xq available example.com/examples/nothing.array'
-          bin/xq available example.com/examples/nothing.json
+          echo '> example.com/examples/employees.xml'
+          bin/xq available example.com/examples/employees.xml
           printf %60s | tr ' ' '-' && echo
       - name: xq get
         run: |
@@ -72,28 +53,28 @@ jobs:
           echo ' - document-node XDM items will be serialized as XML strings'
           echo '> xq get example.com/examples/employees.xml'
           bin/xq get example.com/examples/employees.xml
-          echo ' - array and map XDM items will be serialized as JSON strings'
-          echo '> xq get example.com/examples/colors.array'
-          bin/xq get example.com/examples/colors.array
+          #echo ' - array and map XDM items will be serialized as JSON strings'
+          #echo '> xq get example.com/examples/colors.array'
+          #bin/xq get example.com/examples/colors.array
           printf %60s | tr ' ' '-' && echo
-      - name: xq delete
-        run: |
-          echo '- xq delete {db-path} deletes XDM item from the db'
-          echo '> xq delete example.com/examples/employees.xml'
-          bin/xq delete example.com/examples/employees.xml
-          printf %60s | tr ' ' '-' && echo
-      - name: xq link
-        run: |
-          echo ' - xq CRUD database actions [ put list available get delete link  ] '
-          echo ' - all *static asset* sources are located in the "./src/static-assets/" directory'
-          echo ' - `xq link {domain} {path}` will store db link to a static asset file'
-          echo '> xq link example.com icons/article.svg'
-          xq link example.com icons/article.svg
-          echo '> xq link example.com icons/article.svg'
-          xq link example.com icons/article.svg
-          echo '> xq link example.com icons/note.svg'
-          xq link example.com icons/note.svg
       - name: Stop running xqerl
         run: | 
           make down
           printf %60s | tr ' ' '-' && echo
+#     - name: xq delete
+#       run: |
+#         echo '- xq delete {db-path} deletes XDM item from the db'
+#         echo '> xq delete example.com/examples/employees.xml'
+#         bin/xq delete example.com/examples/employees.xml
+#         printf %60s | tr ' ' '-' && echo
+#     - name: xq link
+#       run: |
+#         echo ' - xq CRUD database actions [ put list available get delete link  ] '
+#         echo ' - all *static asset* sources are located in the "./src/static-assets/" directory'
+#         echo ' - `xq link {domain} {path}` will store db link to a static asset file'
+#         echo '> xq link example.com icons/article.svg'
+#         xq link example.com icons/article.svg
+#         echo '> xq link example.com icons/article.svg'
+#         xq link example.com icons/article.svg
+#         echo '> xq link example.com icons/note.svg'
+#         xq link example.com icons/note.svg
