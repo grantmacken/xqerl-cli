@@ -2,7 +2,7 @@
 %% -*- coding: utf-8 -*-
 %%! -setcookie monster
 %%
--define(SELF_NODE, list_to_atom( "xquery_" ++ integer_to_list(rand:uniform(16#FFFFFFFFF)) ++ "@" ++ net_adm:localhost())).
+-define(SELF_NODE, list_to_atom( "xquery_" ++ integer_to_list(rand:uniform(16#FFFFFFFFF)) ++ "@127.0.0.1")).
 
 printOutError() -> 
   Msg = "ERROR: could not run query",
