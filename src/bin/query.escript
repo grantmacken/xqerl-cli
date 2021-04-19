@@ -3,19 +3,7 @@
 %%! -setcookie monster
 %%
 -define(SELF_NODE, list_to_atom( "xquery_" ++ integer_to_list(rand:uniform(16#FFFFFFFFF)) ++ "@127.0.0.1")).
-
-printOutError() -> 
-  Msg = "ERROR: could not run query",
-  io:format( "~s\n", [ Msg ]).
-
-xqError( RES ) ->
-  Msg =  "ERROR: " ++ binary_to_list(element(3,RES)) ++ "\n",
-  io:format( "~s\n", [ Msg ]).
-
-printOutRes( Res ) ->
-  case Res of
-   Etup when is_tuple(Etup), element(1, Etup) == xqError  -> xqError(Etup);
-   _ -> io:format( "~s\n", [ Res ])
+rmat( "~s\n", [ Res ])
  end.
 
 main([ARG]) ->
@@ -23,7 +11,7 @@ main([ARG]) ->
   try rpc:call( 'xqerl@127.0.0.1', xqerl, run, [ARG]) of
   Res -> printOutRes( Res )
   catch
-    _ -> printOutError()
+    _ -> io:format( "~s\n", [ "ERROR! - failed to run escript"])
   end.
     
 
