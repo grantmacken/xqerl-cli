@@ -30,49 +30,38 @@ jobs:
           echo "$HOME/.local/bin" >> $GITHUB_PATH
           pushd $HOME/.local/bin && ln -s ${GITHUB_WORKSPACE}/bin/xq && popd
           which xq
-      - name: Start running xqerl in a container
+      - name: run xqerl in container
         run: |
           printf %60s | tr ' ' '-' && echo
           echo '> make up'
           make up
           printf %60s | tr ' ' '-' && echo && sleep 2
-      - name: xq put
-        run: |
           echo ' - xq put {data-path} will store a data source as a db XDM item'
           echo '> xq put example.com/examples/employees.xml'
           xq put example.com/examples/employees.xml
-      - name: xq list
-        run: |
           echo ' - xq list {db-path} lists db resources, including links'
           echo '> xq list example.com/examples'
           xq list example.com/examples
           printf %60s | tr ' ' '-' && echo
-      - name: xq available
-        run: |
           echo ' - xq available {db-path} returns true or false'
           echo '> example.com/examples/employees.xml'
           bin/xq available example.com/examples/employees.xml
           printf %60s | tr ' ' '-' && echo
-      - name: get
-        run: |
           echo ' - xq get {db-path} returns a serialized XDM item'
           echo ' - document-node XDM items will be serialized as XML strings'
           echo '> xq get example.com/examples/employees.xml'
           xq get example.com/examples/employees.xml
-          #echo ' - array and map XDM items will be serialized as JSON strings'
-          #echo '> xq get example.com/examples/colors.array'
-          #bin/xq get example.com/examples/colors.array
           printf %60s | tr ' ' '-' && echo
-      - name: update rename
-        run: |
-          echo ' - xq update {uri} {xpath} {key} {qualifier} {what}'
+          echo ' - xq update {uri} {xpath} {key} {qualifier} {what}* '
           echo ' - consists of'
           echo '   1: selection part: {uri} {xpath}  '
-          echo '   2: update part: {key} {qualifier} {what}'
+          echo '   2: update part: {key} {qualifier} {what}*'
           echo '  where {key} is the update keyword [ insert | delete , replace | rename ]'
+          echo '  where {qualifier} is [ node | nodes ]'
           echo "> xq update example.com/examples/employees.xml '/employees/employee[1]/email' rename node 'gmail'"
           xq update example.com/examples/employees.xml '/employees/employee[1]/email' rename node 'gmail'
-          sleep 1
+          echo ">xq update example.com/examples/employees.xml '/employees/employee[1]/salary' delete node"
+          xq update example.com/examples/employees.xml '/employees/employee[1]/salary' delete node
           xq get example.com/examples/employees.xml
           #echo ' - array and map XDM items will be serialized as JSON strings'
           #echo '> xq get example.com/examples/colors.array'

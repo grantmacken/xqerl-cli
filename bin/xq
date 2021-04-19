@@ -273,7 +273,7 @@ function doLookup() {
     "try{('${uri}' => json-doc())${lookup} } catch * {()}" 
 }
 
-function doRename() {
+function doUpdateRename() {
     echo "document uri: $resource"
     echo "xpath selection: $xpath"
     echo "update keyword: $kw"
@@ -287,6 +287,22 @@ function doRename() {
 }; 
 try{ local:update() } catch * {false()}"
 }
+
+# xq update example.com/examples/employees.xml '/employees/employee[1]/gender' delete node
+function doUpdateDelete() {
+    echo "document uri: $resource"
+    echo "xpath selection: $xpath"
+    echo "update keyword: $kw"
+    echo "update qualifier: $qualifier"
+  docker exec xq xqerl escript bin/scripts/pipe.escript \
+"declare %updating function local:update(){
+ for \$var in ('${resource}' => doc())${xpath}
+  return $kw $qualifier \$var
+};
+
+try{ local:update() } catch * {false()}"
+}
+
 case "${args[0]}" in
   put) ## {domain}/{path} create xdm item from file. example: `xq put example.com/usecase/employees.xml`
     dbFilePut ${args[1]}
@@ -326,7 +342,6 @@ case "${args[0]}" in
     xpath="${args[2]}"
     kw="${args[3]}"
     qualifier="${args[4]}"
-    what="${args[5]}"
   #  [[ ${#args[@]} -eq 5 ]] || \
   # die 'params \
   # xq {update} \n 
@@ -349,7 +364,13 @@ case "${args[0]}" in
         esac
         ;;
       delete)
-        echo 'delete'
+        case "${qualifier}" in
+          node)
+          doUpdateDelete          
+          ;;         
+            *)
+            die 'sub cmds are delete [ node ]'
+        esac
         ;;
       replace)
         echo 'replace'
@@ -360,7 +381,8 @@ case "${args[0]}" in
       rename)
         case "${qualifier}" in
           node)
-          doRename            
+          what="${args[5]}"
+          doUpdateRename            
           ;;         
             *)
             die 'sub cmds are insert [ node ]'
