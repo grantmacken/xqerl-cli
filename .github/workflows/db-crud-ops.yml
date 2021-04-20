@@ -30,13 +30,15 @@ jobs:
         shell: bash
         run: |
           docker ps
-          sleep 1
+          sleep 3
           source .env
           echo -n ' - ${RUN_NAME} running: ' 
           docker container inspect -f '{{.State.Running}}' ${RUN_NAME}
           echo -n ' - xqerl application all started: '
-          docker exec xq xqerl eval 'application:ensure_all_started(xqerl).' 
-          docker exec xq xqerl eval 'application:ensure_all_started(xqerl).' | grep -oP 'ok's
-
+          docker exec xq xqerl eval 'application:ensure_all_started(xqerl).' | grep -oP 'ok'
+      - name: upload escripts
+        shell: bash
+        run: |
+          make escripts
 
     
