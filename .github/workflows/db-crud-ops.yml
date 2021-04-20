@@ -7,6 +7,10 @@ jobs:
   xqerl-cli-crud-ops:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
       - name: Github login in and pull helper github packages
         run: |
           echo ${{ secrets.GITHUB_TOKEN }} | docker login docker.pkg.github.com --username ${GITHUB_ACTOR} --password-stdin &> /dev/null
