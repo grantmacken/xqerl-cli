@@ -6,52 +6,21 @@ on:
 jobs:
   xqerl-cli-crud-ops:
     runs-on: ubuntu-latest
+    services:
+       xq:
+        image: grantmacken/alpine-xqerl
+        ports:
+        - 8081:8081
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v2
         with:
           fetch-depth: 1
-      - name: Github login in and pull helper github packages
-        run: |
-          echo ${{ secrets.GITHUB_TOKEN }} | docker login docker.pkg.github.com --username ${GITHUB_ACTOR} --password-stdin &> /dev/null
-          source .env
-          docker pull docker.pkg.github.com/grantmacken/alpine-xqerl/xq:${GHPKG_VER} &> /dev/null
-          echo -n ' - check available: '
-          docker images | grep -oP 'alpine-xqerl'
-          #echo -n ' - check available: '
-          #docker images | grep -oP 'alpine-scour'
-          #echo -n ' - check available: '
-          #docker images | grep -oP 'alpine-zopfli'
-          #echo -n ' - check available: '
-          #docker images | grep -oP 'alpine-cmark-gfm'
       - name: Set up local bin
         run: |
           mkdir -p $HOME/.local/bin
           echo "$HOME/.local/bin" >> $GITHUB_PATH
           pushd $HOME/.local/bin && ln -s ${GITHUB_WORKSPACE}/bin/xq && popd
           which xq
-      - name: run xqerl in container
-        run: |
-          printf %60s | tr ' ' '-' && echo
-          echo '> make up'
-          make up
-          printf %60s | tr ' ' '-' && echo
-      - name:  put xml documents into db as an document node items
-        run: |
-          echo '> xq put example.com/examples/works.xml'
-          xq put example.com/examples/works.xml
-          printf %60s | tr ' ' '-' && echo
-      - name:  get db document node item  
-        run: |
-          echo '> xq get example.com/examples/works.xml'
-          xq get example.com/examples/works.xml
-          printf %60s | tr ' ' '-' && echo
-      - name:  get db document, apply xpath expression
-        run: |
-          echo "> xq get example.com/examples/works.xml '//employee[1]'"
-          xq get example.com/examples/works.xml '//employee[1]'
-          printf %60s | tr ' ' '-' && echo
-      - name: Stop running xqerl
-        run: | 
-          make down
-          printf %60s | tr ' ' '-' && echo ''
+          xq
+    
