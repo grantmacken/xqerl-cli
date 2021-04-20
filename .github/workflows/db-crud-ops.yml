@@ -30,4 +30,11 @@ jobs:
         shell: bash
         run: |
           docker ps
+          sleep 1
+          echo -n ' - $(RUN_NAME) running: ' 
+          docker container inspect -f '{{.State.Running}}' xq
+          echo -n ' - xqerl application all started: '
+          docker exec xq xqerl eval 'application:ensure_all_started(xqerl).' | grep -oP 'ok's
+
+
     
