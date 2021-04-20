@@ -41,7 +41,6 @@ MountAssets="type=volume,target=$XQERL_HOME/priv/static/assets,source=static-ass
 #  xq db CRUD commands for xqerl db
 #######################
 
-
 # [ put {srcFile} ]  Create a db XDM item from a data src file
 function dbFilePut() {
   local base="$(echo $1 | grep -oP '^(src/data/)?\K(.+)$')"
@@ -124,13 +123,38 @@ function dbGetItem() {
   local itemType=$(dbItemType $resource)
   case "$itemType" in
     document-node)
-      docker exec xq xqerl escript bin/scripts/query.escript "'$resource' => doc() => serialize(map{'omit-xml-declaration': true() })"
+      docker exec xq xqerl escript bin/scripts/query.escript \
+       "try{('${resource}' => doc()) => serialize(map{'omit-xml-declaration': true() })} catch * {()}"
       ;;
     array)
      docker exec xq xqerl escript bin/scripts/query.escript \
         "'$resource' => db:get() => serialize(map{'method': 'json' })"
       ;;
     map)
+      docker exec xq xqerl escript bin/scripts/query.escript \
+        "'$resource' => db:get() => serialize(map{'method': 'json' })"
+      ;;
+    *)
+      die "[ $itemType ] unknown XDM item"
+  esac
+}
+
+# [ get ]  Read - given uri get db XDM item
+function dbGetItemPath() {
+  local resource="http://$(echo $1 | grep -oP '^(http://)?\K(.+)$')"
+  local itemType=$(dbItemType $resource)
+  case "$itemType" in
+    document-node)
+      local xpath="${args[2]}"
+      echo ${xpath} | grep -oP '^/(.+)$' &>/dev/null || die 'arg [ xpath ] must be a xpath expression'
+      docker exec xq xqerl escript bin/scripts/query.escript \
+        "try{('${resource}' => doc())${xpath} => serialize(map{'omit-xml-declaration': true() })} catch * {()}"
+      ;;
+    array) #TODO
+     docker exec xq xqerl escript bin/scripts/query.escript \
+        "'$resource' => db:get() => serialize(map{'method': 'json' })"
+      ;;
+    map) # TODO
       docker exec xq xqerl escript bin/scripts/query.escript \
         "'$resource' => db:get() => serialize(map{'method': 'json' })"
       ;;
@@ -151,8 +175,6 @@ function dbGetLink() {
     die "resource NOT found in db: [ $resource ]"
   fi
 }
-
-
 
 # [ list ] Read - list db uri collections
 function dbList() {
@@ -187,7 +209,6 @@ function dbUpdate() {
     else die "xQuery update facilty only available for XML documents[ $ext ]"
   fi
 }
-
 
 # [ delete ] Delete - delete a single XDM or link item
 function dbDeleteItem() {
@@ -273,39 +294,81 @@ function doLookup() {
     "try{('${uri}' => json-doc())${lookup} } catch * {()}" 
 }
 
-function doUpdateRename() {
-    echo "document uri: $resource"
-    echo "xpath selection: $xpath"
-    echo "update keyword: $kw"
-    echo "update qualifier: $qualifier"
-    echo "update what: $what"
-  docker exec xq xqerl escript bin/scripts/pipe.escript \
+# "rename" "node" TargetExpr "as" NewNameExpr
+function dbUpdateRename() {
+  local resource="http://$(echo ${1} | grep -oP '^(http://)?\K(.+)$')"
+  echo "${args[3]}" | grep -oP '^(node)$' &>/dev/null || die 'arg [ node ] must be included '
+  echo "${args[4]}" | grep -oP '^/(.+)$' &>/dev/null || die 'arg [ target ] must be a xpath expression'
+  echo "${args[5]}" | grep -oP '^(as)$' &>/dev/null || die 'arg [ as ] must be included'
+  docker exec xq xqerl escript bin/scripts/query.escript \
 "declare %updating function local:update(){
- for \$var in ('${resource}' => doc())${xpath}
+ for \$var in ('${resource}' => doc())${args[4]}
  return 
-  $kw $qualifier (\$var) as '$what'
+  rename node (\$var) as ${args[6]}
 }; 
-try{ local:update() } catch * {false()}"
+try{(local:update(),'ok')} catch * { 'error: failed'}"
 }
 
-# xq update example.com/examples/employees.xml '/employees/employee[1]/gender' delete node
-function doUpdateDelete() {
-    echo "document uri: $resource"
-    echo "xpath selection: $xpath"
-    echo "update keyword: $kw"
-    echo "update qualifier: $qualifier"
-  docker exec xq xqerl escript bin/scripts/pipe.escript \
-"declare %updating function local:update(){
- for \$var in ('${resource}' => doc())${xpath}
-  return $kw $qualifier \$var
-};
+# xq update example.com/examples/works.xml replace node '//employee[1]/hours[1]' with '<hours>25</hours>'
+function dbUpdateReplace() {
+  local resource="http://$(echo ${1} | grep -oP '^(http://)?\K(.+)$')"
+  echo "${args[3]}" | grep -oP '^(node|value of node)$' &>/dev/null || die 'arg must be [ node | value of node ] '
+  echo "${args[4]}" | grep -oP '^/(.+)$' &>/dev/null || die 'arg [ target ] must be a xpath expression'
+  echo "${args[5]}" | grep -oP '^(with)$' &>/dev/null || die 'arg [ with ] must be included'
+docker exec xq xqerl escript bin/scripts/query.escript \
+    "declare %updating function local:update(){
+      for \$var in ('${resource}' => doc())${args[4]}
+        return replace ${args[3]} \$var with ${args[6]}
+      };
+    try{(local:update(),'ok')  } catch * {false()}"
+}
 
-try{ local:update() } catch * {false()}"
+# DeleteExpr  "delete" ("node" | "nodes") TargetExpr
+# xq update example.com/examples/works.xml delete node /works/employee[1]/hours[1]'
+function dbUpdateDelete() {
+  local resource="http://$(echo ${1} | grep -oP '^(http://)?\K(.+)$')"
+  echo "${args[3]}" | grep -oP '^(node|nodes)$' &>/dev/null || die 'arg must be [ node | nodes ] '
+  echo "${args[4]}" | grep -oP '^/(.+)$' &>/dev/null || die 'arg [ target ] must be a xpath expression'
+  # echo ' - xQuery updating expression ' 
+  # echo "> delete ${args[3]} ('${resource}' => doc())${args[4]}"
+  docker exec xq xqerl escript bin/scripts/query.escript \
+    "declare %updating function local:update(){
+      for \$var in ('${resource}' => doc())${args[4]}
+        return delete ${args[3]} \$var 
+      };
+    try{(local:update(),'ok')  } catch * {false()}"
+  }
+
+# xq update example.com/examples/works.xml insert node '<hours>25</hours>' after '/works[1]/employee[1]/hours[1]'
+function dbUpdateInsert() {
+  local resource="http://$(echo ${1} | grep -oP '^(http://)?\K(.+)$')"
+  echo "${args[3]}" | grep -oP '^(node|nodes)$' &>/dev/null || die 'arg must be [ node | nodes ] '
+  #local qualifier="${args[3]}"
+  #local items="${args[4]}" # should be parsable?
+  echo "${args[5]}" | grep -oP '^(into|before|last|after|as (first|last) into)$' &>/dev/null || \
+    die '{where} one of [ into | before | last | as first into | as last into  ]'
+  #local where="${args[5]}"
+  echo "${args[6]}" | grep -oP '^/(.+)$' &>/dev/null || die 'arg [ target ] must be a xpath expression'
+  #local xpath="${args[6]}"
+  #echo ' - xQuery updating expression ' 
+  #echo "> insert $qualifier $items $where ('${resource}' => doc())${xpath}"
+docker exec xq xqerl escript bin/scripts/query.escript \
+"declare %updating function local:update(){
+  for \$var in ('${resource}' => doc())${args[6]}
+    return insert ${args[3]} ${args[4]} ${args[5]} \$var 
+  };
+try{(local:update(),'ok')  } catch * {false()}"
 }
 
 case "${args[0]}" in
   put) ## {domain}/{path} create xdm item from file. example: `xq put example.com/usecase/employees.xml`
-    dbFilePut ${args[1]}
+    case "${#args[@]}" in
+      2) 
+        dbFilePut ${args[1]}
+        ;;
+      *)
+        die '- xq put {path} : incorrect number of args'
+    esac
     ;;
   list) ## {domain/path} list resources. example: `xq list example.com/usecase`
     dbList ${args[1]}
@@ -321,7 +384,17 @@ case "${args[0]}" in
     if echo ${ext} | grep -oP '^(svgz)$' &>/dev/null
     then dbGetLink ${res}
     elif echo ${ext} | grep -oP '^(cmark|article|xml|array|map)$' &>/dev/null
-    then dbGetItem ${res}
+    then
+      case "${#args[@]}" in
+        2) 
+          dbGetItem "${args[1]}"
+          ;;
+        3)
+          dbGetItemPath "${args[1]}"
+          ;;
+        *)
+          die ' incorrect number of args'
+      esac
     else die "can not handle extension [ $ext ]"
     fi
     ;;
@@ -339,61 +412,61 @@ case "${args[0]}" in
     # xq update example.com/examples/employees.xml '/employees/employee[1]' rename node 'employee1'
     resource="http://$(echo ${args[1]} | grep -oP '^(http://)?\K(.+)$')"
     isDocAvailable "${resource}" &> /dev/null || die ' doc not available'
-    xpath="${args[2]}"
-    kw="${args[3]}"
-    qualifier="${args[4]}"
-  #  [[ ${#args[@]} -eq 5 ]] || \
-  # die 'params \
-  # xq {update} \n 
-  # 1 insert [node|nodes] \n
-  # 1 delete [node|nodes] \n
-  # 1 replace [node|value of node]\n
-  # 1 rename node - a single element or attr'
+    kw="${args[2]}"
+    # echo -n " - with doc ${kw} "
     case "$kw" in
       insert)
-        echo 'insert'
-        case "${qualifier}" in
-          node)
-            echo 'node'
-            ;;         
-          nodes)
-            echo 'nodes'
-            ;;         
-            *)
-            die 'sub cmds are insert [ node | nodes ]'
+       #xq update example.com/examples/works.xml insert node '<hours>60<hours>' after '//employee[1]/hours[1]'
+        case "${#args[@]}" in
+          7) 
+            dbUpdateInsert "${args[1]}"  "${args[2]}"
+            ;;
+          *)
+            die '- xq {db-uri} {keyword1} {keyword2} {items} {where} {target}  : incorrect number of args'
         esac
-        ;;
+      ;;
       delete)
-        case "${qualifier}" in
-          node)
-          doUpdateDelete          
-          ;;         
-            *)
-            die 'sub cmds are delete [ node ]'
+        #xq put example.com/examples/works.xml delete node  '/works[1]/employee[3]/hours[1]'
+        case "${#args[@]}" in
+          5) 
+            dbUpdateDelete "${args[1]}"  "${args[2]}"
+            ;;
+          *)
+            die '- xq {db-uri} {keyword1} {keyword2} {xpath} : incorrect number of args'
         esac
         ;;
-      replace)
-        echo 'replace'
-        ;;
-      replace-content)
-        echo 'replace-content'
+        replace)
+        # replace node location with items
+        case "${#args[@]}" in
+          7) 
+            dbUpdateReplace "${args[1]}" 
+            ;;
+          *)
+            die '- xq update {db-uri} replace {[node|nodes]} {xpath} with {items} : incorrect number of args'
+        esac
         ;;
       rename)
-        case "${qualifier}" in
-          node)
-          what="${args[5]}"
-          doUpdateRename            
-          ;;         
-            *)
-            die 'sub cmds are insert [ node ]'
+        # rename node location as name-expression
+        case "${#args[@]}" in
+          7) 
+            dbUpdateRename "${args[1]}" 
+            ;;
+          *)
+            die '- xq update {db-uri} rename node {xpath} as {name} : incorrect number of args'
         esac
         ;;
         *)
-        die 'sub cmds are [ insert | delete | replace | replace-content | rename  ]'
+        die 'xq update {uri} [ insert | delete | replace | rename ] '
     esac
     ;;
   delete) ## {domain}/{path} delete resource from db. example: `xq delete example.com/static-assets/icons/article.svg`
-   dbDeleteItem "${args[1]}"
+      case "${#args[@]}" in
+        2) 
+          dbDeleteItem "${args[1]}"
+          ;;
+        *)
+          die '- xq delete {db-uri} : incorrect number of args'
+      esac
    ;;
   #domain) # {domain} check if domain exists in db. example: `xq db-exists example.com` 
   #  dbDomainExists ${args[1]}
