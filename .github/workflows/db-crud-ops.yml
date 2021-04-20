@@ -42,7 +42,7 @@ jobs:
           make clean
           make escripts
           make main-modules
-     - name:  Create Read Update Delete
+      - name:  Create Read Update Delete
         run: |
           echo 'xq db CRUD ops'
       - name:  put XML documents into db as an document node items
