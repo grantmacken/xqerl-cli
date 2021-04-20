@@ -113,3 +113,10 @@ jobs:
       - name:  update db document, with rename expression
         run: |
           echo ' update rename expression examples'
+          echo ' - check first works node'
+          xq get example.com/examples/works.xml '/works/*[1]'
+          echo ' - rename emmployee tag to contractor'
+          echo "> xq update example.com/examples/employees.xml rename node '/works/*[1]' as '\"contactor\"'"
+          xq update example.com/examples/employees.xml rename node '/works/*[1]' as '"contactor"'
+          echo ' = update result: check first works node'
+          xq get example.com/examples/works.xml '/works/*[1]'
