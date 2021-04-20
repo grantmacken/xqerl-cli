@@ -7,6 +7,7 @@ jobs:
   xqerl-cli-crud-ops:
     runs-on: ubuntu-latest
     steps:
+    - uses: hmarr/debug-action@v2
       - name: Checkout Repo
         uses: actions/checkout@v2
         with:
@@ -35,37 +36,11 @@ jobs:
           printf %60s | tr ' ' '-' && echo
           echo '> make up'
           make up
-          printf %60s | tr ' ' '-' && echo && sleep 2
-          echo ' - xq put {data-path} will store a data source as a db XDM item'
-          echo '> xq put example.com/examples/employees.xml'
-          xq put example.com/examples/employees.xml
-          echo ' - xq list {db-path} lists db resources, including links'
-          echo '> xq list example.com/examples'
-          xq list example.com/examples
           printf %60s | tr ' ' '-' && echo
-          echo ' - xq available {db-path} returns true or false'
-          echo '> example.com/examples/employees.xml'
-          bin/xq available example.com/examples/employees.xml
-          printf %60s | tr ' ' '-' && echo
-          echo ' - xq get {db-path} returns a serialized XDM item'
-          echo ' - document-node XDM items will be serialized as XML strings'
-          echo '> xq get example.com/examples/employees.xml'
-          xq get example.com/examples/employees.xml
-          printf %60s | tr ' ' '-' && echo
-          echo ' - xq update {uri} {xpath} {key} {qualifier} {what}* '
-          echo ' - consists of'
-          echo '   1: selection part: {uri} {xpath}  '
-          echo '   2: update part: {key} {qualifier} {what}*'
-          echo '  where {key} is the update keyword [ insert | delete , replace | rename ]'
-          echo '  where {qualifier} is [ node | nodes ]'
-          echo "> xq update example.com/examples/employees.xml '/employees/employee[1]/email' rename node 'gmail'"
-          xq update example.com/examples/employees.xml '/employees/employee[1]/email' rename node 'gmail'
-          echo ">xq update example.com/examples/employees.xml '/employees/employee[1]/salary' delete node"
-          xq update example.com/examples/employees.xml '/employees/employee[1]/salary' delete node
-          xq get example.com/examples/employees.xml
-          #echo ' - array and map XDM items will be serialized as JSON strings'
-          #echo '> xq get example.com/examples/colors.array'
-          #bin/xq get example.com/examples/colors.array
+      - name:  put XML documents into db as an document node items
+        run: |
+          echo '> xq put example.com/examples/works.xml'
+          xq put example.com/examples/works.xml
           printf %60s | tr ' ' '-' && echo
       - name: Stop running xqerl
         run: | 
