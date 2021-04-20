@@ -2,7 +2,7 @@ name: db_crud_ops
 on: 
   push:
     branches:
-      - 'xq-update'
+      - 'main'
 jobs:
   xqerl-cli-crud-ops:
     runs-on: ubuntu-latest
