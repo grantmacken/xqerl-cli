@@ -17,10 +17,15 @@ jobs:
         with:
           fetch-depth: 1
       - name: Set up local bin
+        shell: bash
         run: |
           mkdir -p $HOME/.local/bin
           echo "$HOME/.local/bin" >> $GITHUB_PATH
           pushd $HOME/.local/bin && ln -s ${GITHUB_WORKSPACE}/bin/xq && popd
           which xq
           xq
+      - name: check xq container
+        shell: bash
+        run: |
+          docker ps
     
