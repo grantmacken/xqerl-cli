@@ -5,9 +5,6 @@ LibraryModuleSource := $(sort $(wildcard src/library_modules/$(DOMAIN)/*.xqm))
 MainModuleSource    := $(wildcard src/main_modules/*.xq)
 EscriptSource       := $(wildcard src/bin/*.escript)
 DataSource          := $(call rwildcard,src,*.csv *.json *.xml )
-
-
-
 LibraryModules  := $(patsubst src/library_modules/$(DOMAIN)/%,src/.compiled/library_modules/$(DOMAIN)/%,$(LibraryModuleSource))
 MainModules  := $(patsubst src/main_modules/%,src/.compiled/main_modules/%,$(MainModuleSource))
 Escripts := $(patsubst src/bin/%.escript,src/.binned/%.escript,$(EscriptSource))

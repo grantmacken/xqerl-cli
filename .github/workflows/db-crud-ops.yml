@@ -41,5 +41,10 @@ jobs:
         run: |
           make escripts
           make main-modules
+      - name:  put XML documents into db as an document node items
+        run: |
+          echo '> xq put example.com/examples/employees.xml'
+          xq put example.com/examples/employees.xml
+          printf %60s | tr ' ' '-' && echo
 
     
