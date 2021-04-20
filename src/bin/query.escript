@@ -2,11 +2,7 @@
 %% -*- coding: utf-8 -*-
 %%! -setcookie monster
 %%
--define(SELF_NODE, list_to_atom( "query" ++ "@" ++ net_adm:localhost())).
-
-printOutError() -> 
-  Msg = "ERROR: could not run query",
-  io:format( "~s\n", [ Msg ]).
+-define(SELF_NODE, list_to_atom( "xquery_" ++ integer_to_list(rand:uniform(16#FFFFFFFFF)) ++ "@127.0.0.1")).
 
 xqError( RES ) ->
   Msg =  "ERROR: " ++ binary_to_list(element(3,RES)) ++ "\n",
@@ -20,11 +16,10 @@ printOutRes( Res ) ->
 
 main([ARG]) ->
   {ok, _} = net_kernel:start([?SELF_NODE, longnames]),
-  XQERL_NODE = list_to_atom(os:getenv("NAME")),
-  try rpc:call( XQERL_NODE, xqerl, run, [ARG]) of
+  try rpc:call( 'xqerl@127.0.0.1', xqerl, run, [ARG]) of
   Res -> printOutRes( Res )
   catch
-    _ -> printOutError()
+    _ -> io:format( "~s\n", [  "error: failed to run query" ])
   end.
     
 

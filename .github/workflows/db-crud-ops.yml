@@ -2,98 +2,133 @@ name: db_crud_ops
 on: 
   push:
     branches:
-      - 'db'
+      - 'xq-update'
 jobs:
   xqerl-cli-crud-ops:
     runs-on: ubuntu-latest
+    services:
+       xq:
+        image: grantmacken/alpine-xqerl
+        ports:
+        - 8081:8081
+        # volumes: also env 
+        options: --name xq
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v2
         with:
           fetch-depth: 1
-      - name: Github login in and pull helper github packages
+      - name: Set up local bin
+        shell: bash
         run: |
-          echo ${{ secrets.GITHUB_TOKEN }} | docker login docker.pkg.github.com --username ${GITHUB_ACTOR} --password-stdin &> /dev/null
+          mkdir -p $HOME/.local/bin
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          pushd $HOME/.local/bin && ln -s ${GITHUB_WORKSPACE}/bin/xq && popd
+          which xq
+          xq
+      - name: check xq container
+        shell: bash
+        run: |
+          docker ps
+          sleep 3
           source .env
-          docker pull docker.pkg.github.com/grantmacken/alpine-xqerl/xq:${GHPKG_VER} &> /dev/null
-          docker pull docker.pkg.github.com/grantmacken/alpine-scour/scour:0.0.2 &> /dev/null
-          docker pull docker.pkg.github.com/grantmacken/alpine-zopfli/zopfli:0.0.1 &> /dev/null
-          docker pull docker.pkg.github.com/grantmacken/alpine-cmark-gfm/cmark-gfm:0.29.0 &> /dev/null
-          echo -n ' - check available: '
-          docker images | grep -oP 'alpine-xqerl'
-          echo -n ' - check available: '
-          docker images | grep -oP 'alpine-scour'
-          echo -n ' - check available: '
-          docker images | grep -oP 'alpine-zopfli'
-          echo -n ' - check available: '
-          docker images | grep -oP 'alpine-cmark-gfm'
-      - name: Start running xqerl in a container
+          echo -n ' - ${RUN_NAME} running: ' 
+          docker container inspect -f '{{.State.Running}}' ${RUN_NAME}
+          echo -n ' - xqerl application all started: '
+          docker exec xq xqerl eval 'application:ensure_all_started(xqerl).' | grep -oP 'ok'
+      - name: upload escripts
+        shell: bash
         run: |
+          make clean
+          make escripts
+          make main-modules
+      - name:  Create Read Update Delete
+        run: |
+          echo 'xq db CRUD ops'
+      - name:  put XML documents into db as an document node items
+        run: |
+          echo '> xq put example.com/examples/works.xml'
+          xq put example.com/examples/works.xml
           printf %60s | tr ' ' '-' && echo
-          echo '> make up'
-          make up
-          printf %60s | tr ' ' '-' && echo && sleep 2
-      - name: xq CRUD database actions 
+      - name:  get db item
         run: |
-          echo ' - xq CRUD database actions [ put list available get delete link  ] '
-          printf %60s | tr ' ' '=' && echo
-          echo ' - all *data* sources are located in the "./src/data/" directory'
-          echo ' - *data* source starts with a {domain}.'
-      - name: xq put
-        run: |
-          echo ' - xq put {data-path} will store a data source as a db XDM item'
-          echo '> xq put example.com/examples/employees.xml'
-          bin/xq put example.com/examples/employees.xml
-          echo '> xq put example.com/examples/colors.json'
-          bin/xq put example.com/examples/colors.json
-          echo '> xq put example.com/examples/mildred.json'
-          bin/xq put example.com/examples/mildred.json
-          echo '> xq put example.com/content/index.md'
-          bin/xq put example.com/content/index.md
-          echo '> xq put example.com/examples/exit_entry.csv'
-          xq put example.com/examples/exit_entry.csv
-      - name: xq list
-        run: |
-          echo ' - xq list {db-path} lists db resources, including links'
-          echo '> xq list example.com/examples'
-          bin/xq list example.com/examples
+          echo '> xq get example.com/examples/works.xml'
+          xq get example.com/examples/works.xml 
           printf %60s | tr ' ' '-' && echo
-      - name: xq available
+      - name:  get db document node item, apply xPath expression
         run: |
-          echo ' - xq available {db-path} returns true or false'
-          echo '> xq available example.com/examples/colors.array'
-          bin/xq available example.com/examples/colors.json
-          echo '> xq available example.com/examples/nothing.array'
-          bin/xq available example.com/examples/nothing.json
+          echo "> xq get example.com/examples/works.xml '//employee[1]'"
+          xq get example.com/examples/works.xml '//employee[3]'
           printf %60s | tr ' ' '-' && echo
-      - name: xq get
+      - name:  the XQuery Update Facility
         run: |
-          echo ' - xq get {db-path} returns a serialized XDM item'
-          echo ' - document-node XDM items will be serialized as XML strings'
-          echo '> xq get example.com/examples/employees.xml'
-          bin/xq get example.com/examples/employees.xml
-          echo ' - array and map XDM items will be serialized as JSON strings'
-          echo '> xq get example.com/examples/colors.array'
-          bin/xq get example.com/examples/colors.array
-          printf %60s | tr ' ' '-' && echo
-      - name: xq delete
+          echo '@see https://www.xmlmind.com/tutorials/XQueryUpdate/index.html'
+          echo ' xq update {db-uri} [ insert replace delete rename]'
+      - name:  update db document, with insert expression
         run: |
-          echo '- xq delete {db-path} deletes XDM item from the db'
-          echo '> xq delete example.com/examples/employees.xml'
-          bin/xq delete example.com/examples/employees.xml
+          echo ' insert expression examples'
+          echo ' - check employee[3] details'
+          echo "> xq update example.com/examples/works.xml '//employee[3]'"
+          echo ' - check hours worked'
+          echo "> xq get example.com/examples/works.xml '//employee[3]/hours => sum()"
+          xq get example.com/examples/works.xml '//employee[3]/hours => sum()'
           printf %60s | tr ' ' '-' && echo
-      - name: xq link
+          echo ' - add more hours for employee[3]'
+          echo "> xq update example.com/examples/works.xml insert node '<hours>40</hours>' into '//employee[3]'"
+          xq update example.com/examples/works.xml insert node '<hours>40</hours>' into '//employee[3]'          
+          printf %60s | tr ' ' '-' && echo
+          echo ' - check result'
+          echo "> xq get example.com/examples/works.xml '//employee[3]'"
+          xq get example.com/examples/works.xml '//employee[3]'          
+          echo ' - check how many hours employee[3] has done'
+          echo "> xq get example.com/examples/works.xml '//employee[3]/hours => sum()'"
+          xq get example.com/examples/works.xml '//employee[3]/hours => sum()'
+          echo ' - check how many hours all employees have done'
+          echo "> xq get example.com/examples/works.xml '//employee/hours => sum()'"
+          xq get example.com/examples/works.xml '//employee/hours => sum()'
+          printf %60s | tr ' ' '-' && echo
+      - name:  update db document, with delete expression
         run: |
-          echo ' - xq CRUD database actions [ put list available get delete link  ] '
-          echo ' - all *static asset* sources are located in the "./src/static-assets/" directory'
-          echo ' - `xq link {domain} {path}` will store db link to a static asset file'
-          echo '> xq link example.com icons/article.svg'
-          xq link example.com icons/article.svg
-          echo '> xq link example.com icons/article.svg'
-          xq link example.com icons/article.svg
-          echo '> xq link example.com icons/note.svg'
-          xq link example.com icons/note.svg
-      - name: Stop running xqerl
-        run: | 
-          make down
-          printf %60s | tr ' ' '-' && echo
+          echo ' update delete expression examples'
+          echo ' - check employee[2] hour details'
+          xq get example.com/examples/works.xml '//employee[2]/hours'
+          echo ' - delete first lot of hours for employee[2]'
+          echo "> xq update example.com/examples/works.xml delete node '//employee[2]/hours[1]'"
+          xq update example.com/examples/works.xml delete node '//employee[2]/hours[1]'    
+          echo ' - check  employee[2] details'
+          echo "> xq get example.com/examples/works.xml '//employee[2]'"
+          xq get example.com/examples/works.xml '//employee[2]'
+      - name:  update db document, with replace expression
+        run: |
+          echo ' update replace expression examples'
+          echo ' - check employee[1] hour details'
+          xq get example.com/examples/works.xml '//employee[1]/hours'
+          echo ' - correct the hours for employee[1]'
+          echo "> xq update example.com/examples/works.xml replace node '//employee[1]/hours[1]'  with '<hours>25</hours>'"
+          xq update example.com/examples/works.xml replace node '//employee[1]/hours[1]' with '<hours>25</hours>'
+          echo ' - update result: check employee[1] hour details'
+          xq get example.com/examples/works.xml '//employee[1]/hours'
+          echo ' - or just alter the hour value'
+          echo "> xq update example.com/examples/works.xml replace 'value of node' '//employee[1]/hours[1]' with '\"30\"'"
+          xq update example.com/examples/works.xml replace 'value of node' '//employee[1]/hours[1]' with '"30"'
+          echo ' - update result: check employee[1] hour details'
+          xq get example.com/examples/works.xml '//employee[1]/hours'
+      - name:  update db document, with rename expression
+        run: |
+          echo ' update rename expression examples'
+          echo ' - check first works node'
+          xq get example.com/examples/works.xml '/works/*[1]'
+          echo ' - rename emmployee tag to contractor'
+          echo "> xq update example.com/examples/works.xml rename node '/works/*[1]' as '\"contactor\"'"
+          xq update example.com/examples/works.xml rename node '/works/*[1]' as '"contactor"'
+          echo ' - update result: check first works node'
+          xq get example.com/examples/works.xml '/works/*[1]'
+          echo ' - update result: check contractor hours'
+          xq get example.com/examples/works.xml '//contactor/hours => sum()'
+          echo ' - update result: check employee hours'
+          xq get example.com/examples/works.xml '//employee/hours => sum()'
+          echo ' - update result: check all hours worked'
+          xq get example.com/examples/works.xml '/works/*/hours => sum()'
+          
+
+
