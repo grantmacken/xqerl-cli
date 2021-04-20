@@ -53,7 +53,7 @@ jobs:
       - name:  get db item
         run: |
           echo '> xq get example.com/examples/works.xml'
-          xq get example.com/examples/works.xml | xmllint --format -
+          xq get example.com/examples/works.xml 
           printf %60s | tr ' ' '-' && echo
       - name:  get db document node item, apply xPath expression
         run: |
@@ -66,6 +66,7 @@ jobs:
           echo ' xq update {db-uri} [ insert replace delete rename]'
       - name:  update db document, with insert expression
         run: |
+          echo ' insert expression examples'
           echo ' - add more hours for employee[3]'
           echo "> xq update example.com/examples/works.xml insert node '<hours>40</hours>' into '//employee[3]'"
           xq update example.com/examples/works.xml insert node '<hours>40</hours>' into '//employee[3]'          
@@ -77,3 +78,12 @@ jobs:
           echo "> xq get example.com/examples/works.xml '//employee[3]/hours => sum()'"
           xq get example.com/examples/works.xml '//employee[3]/hours => sum()'
           printf %60s | tr ' ' '-' && echo
+      - name:  update db document, with delete expression
+        run: |
+          echo ' update delete expression examples'
+      - name:  update db document, with replace expression
+        run: |
+          echo ' update replace expression examples'
+      - name:  update db document, with rename expression
+        run: |
+          echo ' update rename expression examples'
