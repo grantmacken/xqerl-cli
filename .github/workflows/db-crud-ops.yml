@@ -40,5 +40,6 @@ jobs:
         shell: bash
         run: |
           make escripts
+          make main-modules
 
     
