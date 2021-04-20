@@ -44,7 +44,7 @@ jobs:
           make main-modules
      - name:  Create Read Update Delete
         run: |
-          echo xq db CRUD ops '
+          echo 'xq db CRUD ops'
       - name:  put XML documents into db as an document node items
         run: |
           echo '> xq put example.com/examples/works.xml'
@@ -77,5 +77,3 @@ jobs:
           echo "> xq get example.com/examples/works.xml '//employee[3]/hours => sum()'"
           xq get example.com/examples/works.xml '//employee[3]/hours => sum()'
           printf %60s | tr ' ' '-' && echo
-
-    
