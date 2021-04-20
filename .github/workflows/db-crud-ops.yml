@@ -11,6 +11,8 @@ jobs:
         image: grantmacken/alpine-xqerl
         ports:
         - 8081:8081
+        # volumes: also env 
+        options: --name xq
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v2
