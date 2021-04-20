@@ -36,10 +36,20 @@ jobs:
           echo '> make up'
           make up
           printf %60s | tr ' ' '-' && echo
-      - name:  put XML documents into db as an document node items
+      - name:  put xml documents into db as an document node items
         run: |
           echo '> xq put example.com/examples/works.xml'
           xq put example.com/examples/works.xml
+          printf %60s | tr ' ' '-' && echo
+      - name:  get db document node item  
+        run: |
+          echo '> xq get example.com/examples/works.xml'
+          xq get example.com/examples/works.xml
+          printf %60s | tr ' ' '-' && echo
+      - name:  get db document, apply xpath expression
+        run: |
+          echo "> xq get example.com/examples/works.xml '//employee[1]'"
+          xq get example.com/examples/works.xml '//employee[1]'
           printf %60s | tr ' ' '-' && echo
       - name: Stop running xqerl
         run: | 
