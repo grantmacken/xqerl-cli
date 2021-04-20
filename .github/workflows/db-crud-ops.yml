@@ -7,11 +7,6 @@ jobs:
   xqerl-cli-crud-ops:
     runs-on: ubuntu-latest
     steps:
-    - uses: hmarr/debug-action@v2
-      - name: Checkout Repo
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 1
       - name: Github login in and pull helper github packages
         run: |
           echo ${{ secrets.GITHUB_TOKEN }} | docker login docker.pkg.github.com --username ${GITHUB_ACTOR} --password-stdin &> /dev/null
@@ -45,21 +40,4 @@ jobs:
       - name: Stop running xqerl
         run: | 
           make down
-          printf %60s | tr ' ' '-' && echo
-#     - name: xq delete
-#       run: |
-#         echo '- xq delete {db-path} deletes XDM item from the db'
-#         echo '> xq delete example.com/examples/employees.xml'
-#         bin/xq delete example.com/examples/employees.xml
-#         printf %60s | tr ' ' '-' && echo
-#     - name: xq link
-#       run: |
-#         echo ' - xq CRUD database actions [ put list available get delete link  ] '
-#         echo ' - all *static asset* sources are located in the "./src/static-assets/" directory'
-#         echo ' - `xq link {domain} {path}` will store db link to a static asset file'
-#         echo '> xq link example.com icons/article.svg'
-#         xq link example.com icons/article.svg
-#         echo '> xq link example.com icons/article.svg'
-#         xq link example.com icons/article.svg
-#         echo '> xq link example.com icons/note.svg'
-#         xq link example.com icons/note.svg
+          printf %60s | tr ' ' '-' && echo ''
