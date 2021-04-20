@@ -60,7 +60,7 @@ jobs:
           echo "> xq get example.com/examples/works.xml '//employee[1]'"
           xq get example.com/examples/works.xml '//employee[3]'
           printf %60s | tr ' ' '-' && echo
-     - name:  the XQuery Update Facility
+      - name:  the XQuery Update Facility
         run: |
           echo '@see https://www.xmlmind.com/tutorials/XQueryUpdate/index.html'
           echo ' xq update {db-uri} [ insert replace delete rename]'
