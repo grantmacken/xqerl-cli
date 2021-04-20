@@ -39,12 +39,13 @@ jobs:
       - name: upload escripts
         shell: bash
         run: |
+          make clean
           make escripts
           make main-modules
       - name:  put XML documents into db as an document node items
         run: |
-          echo '> xq put example.com/examples/employees.xml'
-          xq put example.com/examples/employees.xml
+          echo '> xq put example.com/examples/works.xml'
+          xq put example.com/examples/works.xml
           printf %60s | tr ' ' '-' && echo
 
     

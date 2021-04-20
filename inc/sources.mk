@@ -10,7 +10,6 @@ MainModules  := $(patsubst src/main_modules/%,src/.compiled/main_modules/%,$(Mai
 Escripts := $(patsubst src/bin/%.escript,src/.binned/%.escript,$(EscriptSource))
 TmpData := $(patsubst src/data/%,src/.tmpData/%,$(DataSource))
 
-
 .PHONY: data
 data: $(TmpData)
 

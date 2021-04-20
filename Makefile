@@ -32,4 +32,5 @@ init: clean
 clean:
 	@rm -f $(Escripts)
 	@rm -f $(TmpData)
+	@rm -f $(MainModules)
 
