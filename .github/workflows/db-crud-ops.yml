@@ -96,6 +96,14 @@ jobs:
       - name:  update db document, with replace expression
         run: |
           echo ' update replace expression examples'
+          echo ' - correct the hours for employee[3]'
+          echo "> xq update example.com/examples/works.xml replace node '//employee[3]/hours[2]'  with '<hours>25</hours>'"
+          xq update example.com/examples/works.xml replace node '//employee[1]/hours[1]' with '<hours>25</hours>'
+          echo ' - or just alter the hour value'
+          echo "> xq update example.com/examples/works.xml replace 'value of node' '//employee[3]/hours[2]' with '\"25\"'"
+          xq update example.com/examples/works.xml replace 'value of node' '//employee[1]/hours[1]' with '"25"'
+
+
       - name:  update db document, with rename expression
         run: |
           echo ' update rename expression examples'
