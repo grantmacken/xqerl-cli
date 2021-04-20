@@ -81,6 +81,12 @@ jobs:
       - name:  update db document, with delete expression
         run: |
           echo ' update delete expression examples'
+          echo ' - remove hours for employee[2]'
+          echo "> xq update example.com/examples/works.xml delete node '//employee[2]/hours[1]'"
+          xq update example.com/examples/works.xml delete node '//employee[3]/hours[1]'    
+          echo ' - check  employee[3] details'
+          echo "> xq get example.com/examples/works.xml '//employee[2]'"
+          xq get example.com/examples/works.xml '//employee[2]'
       - name:  update db document, with replace expression
         run: |
           echo ' update replace expression examples'
