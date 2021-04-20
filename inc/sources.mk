@@ -50,7 +50,3 @@ src/.compiled/library_modules/$(DOMAIN)/%.xqm: src/library_modules/$(DOMAIN)/%.x
 	@#bin/scripts/compile.escript $(notdir $<) 
 	@mkdir -p $(dir $@)
 	@cp $< $@
-
-
-
-
