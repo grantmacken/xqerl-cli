@@ -1,4 +1,5 @@
-declare variable $arg external;
+declare variable $arg1 external;
+declare variable $arg2 external;
 declare variable $dbIO := QName("http://markup.nz/#err", 'dbIO');
 (:~
  : xqerl db can store any XDM item type
@@ -12,26 +13,24 @@ function local:store($item, $uri){
 }; 
 
 try {
-let $argPath := ('/tmp', $arg ) => string-join('/')
-let $path := 
-  if ( $argPath  => file:is-file() ) 
-  then $argPath => file:path-to-uri() => string()
-  else ( error( $dbIO, ``[ file [ `{$argPath}` ] not found  ]``))
-let $name := $path => file:name()
+let $name := $arg1 => file:name()
 let $ext := $name => substring-after('.')
-let $base := $arg => substring-before( $name )
+let $base := $arg1 => substring-before( $name )
+let $str := $arg2
 let $item :=
   switch ( $ext )
-  case "svg" return $path => file:read-text()  => parse-xml()
-  case "csv" return $path => file:read-text()  => csv:parse()
-  case "json" return $path => fn:json-doc()
-  case "xml" return $path =>  file:read-text()  => parse-xml()
-  (: cmark documents are the ones created via the cmark app 
+  case "svg" return $str   => parse-xml()
+  (: commonmark markdown converted by cmark to commonmark XML
    : using the -to XML flag The xml doc is a AST of markdown 
    : the doc can be converted to an article via a typeswitch in markup.xq
    : and wrapped to produce HTML via wrap.xq :)
-  case "cmark" return $path =>  file:read-text()  => parse-xml()
-  default return error( $dbIO, ``[ [ `{$ext}` ] handle can not be parsed ]``)
+  case "md" return $str   => parse-xml()
+  case "csv" return $str  => csv:parse()
+  case "json" return $str =>  parse-json()
+  case "xml" return $str =>   parse-xml()
+  (: html converted by tidyhtml5 to XML :)
+  case "html" return $str  => parse-xml()
+  default return error( $dbIO, ``[ [ `{$name}` ]  can not be parsed ]``)
 
 let $getFuncType := function( $item as item()) as xs:string {
       if ($item instance of map(*)) then 'map'
@@ -50,14 +49,15 @@ let $uri :=
   switch ( $ext )
     case "svg" return $uriBase => concat( $ext )
     case "xml" return $uriBase => concat( $ext )
-    case "cmark" return $uriBase => concat( $ext )
+    case "html" return $uriBase => concat( 'xhtml' )
+    case "md" return $uriBase => concat( 'cmark' )
+    (: the cmark extension is arbitary, it just tells me this is a cmark converted XML doc:)
     case "csv" return $uriBase => concat( $item => $getItemType())
     case "json" return $uriBase => concat( $item => $getItemType())
     default return   error( $dbIO, ``[ [ `{$ext}` ] can not handle extension ]``) 
 
 return (
-local:store($item, $uri)
-,
+local:store($item, $uri) ,
 ``[ - ok: stored into db
  - XDM item: `{$item => $getItemType()}` 
  - location: `{$uri}`]``
