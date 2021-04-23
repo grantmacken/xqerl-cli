@@ -21,8 +21,3 @@ main([ARG]) ->
   catch
     _ -> io:format( "~s\n", [  "error: failed to run query" ])
   end.
-    
-
-  
-
-

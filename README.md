@@ -1,6 +1,6 @@
 # xqerl-cli
 
-`xq` is a terminal cli for a dockerized xqerl
+`xq` is a terminal cli for a dockerized [xqerl](https://zadean.github.io/xqerl))
 
  [xqerl](https://zadean.github.io/xqerl)
  maintained by 
@@ -13,7 +13,6 @@ building microservices and modern data driven websites.
 This repo also a provides a simple directory structure,
 you can use as a template when creating xQuery projects.
 
-
 ## WIP xq commands 
 
 xq Create Read Update Delete (CRUD) commands for working with xqerl database
@@ -25,12 +24,24 @@ to a binary or unparsed text file then return db location URI
  - [x] `xq list {db-uri}` given *db-uri*, return uri list of db resources
  - [x] `xq available {db-uri}` given *db-uri*, return true or false
  - [ ] `xq type {db-uri}` given *db-uri*, return the db XDM type
- - [ ] `xq update {db-uri} {update-expression}` given *db-uri* and 
+ - [x] `xq update {db-uri} {update-expression}` given *db-uri* and 
 *update-expression*, **update** XML resource, then return true or false
  - [x] `xq delete {db-uri}` given *db-uri*, **delete** item, then return true 
 or false
  - [ ] `xq destroy {db-uri}` given *db-uri*, **destroy** everything in db 
 collection, then return true or false
+
+## WIP make commands
+ - [x] `make up` run a dockerized xqerl instance 
+ - [x] `make down` stop dockerized xqerl instance 
+ - [ ] `make boot` on os boot run a dockerized xqerl instance using systemd
+ - [x] `make escripts` copy any changed escripts into running xqerl instance 
+ - [x] `make main-modules` copy and check compile status of any changed xQuery main-modules
+ - [ ] `make library-modules` copy and compile an ordered list of  xQuery library-modules
+ - [ ] `make watch` watch for changes to escripts, main-modules and library-modules 
+ - [ ] `make backup` tar xqerl docker volumes 
+ - [ ] `make retstore` restore xqerl docker volumes with backup tars   
+
 
 # Getting Started
 
@@ -118,12 +129,51 @@ part of the db stored location uri
  - location: http://example.com/examples/employees.xml
  ```
 
+The xqerl database can store other XDM items beside XML documents as a document-nodes.
+Lets store some JSON documents.
 
+```
+> xq put src/data/example.com/examples/mildred.json
+ - ok: stored into db
+ - XDM item: map
+ - location: http://example.com/examples/mildred.map
+> xq put src/data/example.com/examples/colors.json
+ - ok: stored into db
+ - XDM item: array
+ - location: http://example.com/examples/colors.array
+ ```
 
+As you can see from the output the 'mildred.json' doc a now a xqerl db stored 'map' item
+and the 'colors.json' doc a now a xqerl db stored 'map' item.
 
- ## TODO!
+Other data sources can be converted into XDM items
 
+**CSV** stored as an array item via the csv module
+```
+> xq put src/data/example.com/examples/entry_exit.csv
+ - ok: stored into db
+ - XDM item: array
+ - location: http://example.com/examples/entry_exit.array
+```
 
+ **markdown** stored as an document-node item. The document-node item is the result of markdown src ran thru a dockerized cmark with the -to xml flag set. 
+
+```
+> xq put src/data/example.com/content/index.md
+ - ok: stored into db
+ - XDM item: document-node
+ - location: http://example.com/content/index.cmark
+```
+ The cmark extension is a arbitrary construct, so I know is a XML doc produced
+ by cmark. 
+
+ **html** stored as an document-node item. The document-node item is the result of a html src ran thru a dockerized tidyhtml5 with flags set to produce XML.
+
+```
+> xq put src/data/example.com/examples/hello-world.html
+ - ok: stored into db
+ - XDM item: document-node
+ - location: http://example.com/examples/hello-world.xhtml
 
 
 
