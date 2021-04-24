@@ -11,6 +11,7 @@ xqError( RES ) ->
 printOutRes( Res ) ->
   case Res of
    Etup when is_tuple(Etup), element(1, Etup) == xqError  -> xqError(Etup);
+   Number when is_number(Number) -> io:format( "~p\n", [ Res ]);
    _ -> io:format( "~s\n", [ Res ])
  end.
 
