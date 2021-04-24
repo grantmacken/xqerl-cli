@@ -12,8 +12,9 @@ printOutRes( Res ) ->
   case Res of
    Etup when is_tuple(Etup), element(1, Etup) == xqError  -> xqError(Etup);
    Number when is_number(Number) -> io:format( "~p\n", [ Res ]);
-   Binary when is_binary(Binary)  -> io:format( "~s\n", [ 'binary' ]);
-   List when is_list(List)  -> io:format( "~s\n", [ 'list' ]);
+   Binary when is_binary(Binary)  -> io:format( "~s\n", [ Res ] );
+   Array when is_tuple(Array),element(1, Array)  -> io:format( "~s\n", [ 'array' ]);
+   List when is_list(List)  -> io:format( "\n", [ List ] );
    _  -> io:format( "~p\n",[ Res ])
  end.
 
