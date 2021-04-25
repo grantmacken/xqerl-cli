@@ -47,8 +47,7 @@ collection, then return true or false
  - [ ] `make library-modules` copy and compile an ordered list of  xQuery library-modules
  - [ ] `make watch` watch for changes to escripts, main-modules and library-modules 
  - [ ] `make backup` tar xqerl docker volumes 
- - [ ] `make retstore` restore xqerl docker volumes with backup tars   
-
+ - [ ] `make restore` restore xqerl docker volumes with backup tars   
 
 ## Getting Started
 
@@ -103,11 +102,11 @@ The xqerl database can store
 
 2. links A db *link* is a reference to binary or unparsed text file on the containers file system
 
-## xqerl database CRUD operations
+# xqerl database CRUD operations
 
 Create Read Update Delete
 
-### Create
+## Create
 
  - `xq put {file-path}`
  - `xq plonk {file-path}` TODO! put unparsed text into db
@@ -178,7 +177,7 @@ Other data sources can be converted into XDM items.
  - location: http://example.com/examples/entry_exit.array
 ```
 
-#### Using dockerized helpers
+##### Using dockerized helpers
 
 With some dockerized helpers, we can store other data as XDM items.
  Remember if we can turn our data source into db stored XDM items,

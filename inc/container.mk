@@ -1,10 +1,19 @@
 .PHONY: pull
-pull: 
+pull: pull-container-helpers
 	@docker pull docker.pkg.github.com/grantmacken/alpine-xqerl/xq:$(GHPKG_VER) &> /dev/null
 	@docker pull docker.pkg.github.com/grantmacken/alpine-scour/scour:0.0.2 &> /dev/null
 	@docker pull docker.pkg.github.com/grantmacken/alpine-zopfli/zopfli:0.0.1 &> /dev/null
 	@docker pull docker.pkg.github.com/grantmacken/alpine-cmark-gfm/cmark-gfm:0.29.0 &> /dev/null
 	@docker pull docker.pkg.github.com/grantmacken/alpine-htmltidy/htmltidy5:5.7.28 &> /dev/null
+
+.PHONY: pull-container-helpers
+pull-container-helpers:
+	@docker pull docker.pkg.github.com/grantmacken/alpine-scour/scour:0.0.2 &> /dev/null
+	@docker pull docker.pkg.github.com/grantmacken/alpine-zopfli/zopfli:0.0.1 &> /dev/null
+	@docker pull docker.pkg.github.com/grantmacken/alpine-cmark-gfm/cmark-gfm:0.29.0 &> /dev/null
+	@docker pull docker.pkg.github.com/grantmacken/alpine-htmltidy/htmltidy5:5.7.28 &> /dev/null
+
+
 
 MustHaveNetwork = docker network list --format "{{.Name}}" | \
  grep -q $(1) || docker network create $(NETWORK) &>/dev/null
