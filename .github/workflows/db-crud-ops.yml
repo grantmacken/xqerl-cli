@@ -47,8 +47,9 @@ jobs:
           echo ${{ secrets.GITHUB_TOKEN }} | docker login docker.pkg.github.com --username ${GITHUB_ACTOR} --password-stdin &> /dev/null
           make pull-container-helpers
       - name:  Create Read Update Delete
-        run: echo ' create: put | link | plonk'
-      - name: Create [ xq put ]
+        run: |
+          echo ' create: put | link | plonk'
+      - name: Create With Put
         run: |
           echo '> xq put example.com/examples/works.xml'
           xq put example.com/examples/works.xml
