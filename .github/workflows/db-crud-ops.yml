@@ -2,7 +2,7 @@ name: db_crud_ops
 on: 
   push:
     branches:
-      - 'main'
+      - 'read-more'
 jobs:
   xqerl-cli-crud-ops:
     runs-on: ubuntu-latest
@@ -43,12 +43,20 @@ jobs:
           make escripts
           make main-modules
       - name:  Create Read Update Delete
-        run: |
-          echo 'xq db CRUD ops'
-      - name:  put XML documents into db as an document node items
+        echo ' create: put | link | plonk'
+      - name: Create: xq put
         run: |
           echo '> xq put example.com/examples/works.xml'
           xq put example.com/examples/works.xml
+          printf %60s | tr ' ' '-' && echo
+          echo '> xq put example.com/examples/mildred.json'
+          xq put example.com/examples/mildred.json
+          printf %60s | tr ' ' '-' && echo
+          echo '> xq put src/data/example.com/examples/colors.json'
+          xq put src/data/example.com/examples/colors.json
+          printf %60s | tr ' ' '-' && echo
+          echo '> xq put src/data/example.com/examples/entry_exit.csv'
+          xq put src/data/example.com/examples/entry_exit.csv
           printf %60s | tr ' ' '-' && echo
       - name:  get db item
         run: |

@@ -50,7 +50,7 @@ collection, then return true or false
  - [ ] `make retstore` restore xqerl docker volumes with backup tars   
 
 
-# Getting Started
+## Getting Started
 
 ```
 git clone git@github.com:grantmacken/.git
@@ -108,6 +108,13 @@ The xqerl database can store
 Create Read Update Delete
 
 ### Create
+
+ - `xq put {file-path}`
+ - `xq plonk {file-path}` TODO! put unparsed text into db
+ - `xq link {file-path}`
+
+
+#### Put
 
 `xq put {file-path}`
 
@@ -225,11 +232,25 @@ A [dockerized htmltidy](https://github.com/grantmacken/alpine-htmltidy)
 Note: the xhtml extension is an arbitrary construct
 
 
+#### Plonk
+
+TODO!
+
+#### Link
+
+TODO!
+
+
+
+
 ### Read 
 
- - list
- - available
- - 
+ - `xq list {db-uri}`
+ - `xq available {db-uri}`
+ - `xq get {db-uri}`
+ - `xq get {db-uri} {xpath}`
+ - `xq get {db-uri} {lookup}`
+ 
 
 #### List
 
