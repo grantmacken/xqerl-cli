@@ -82,7 +82,7 @@ that communicates with the running *xq* container.
 The xqerl database engine can handle multiple base-URI databases.
 A base-URI is schema plus domain `{schema}://{domain}`).
 example `http://example.com`.
-Each each base-URI constitutes a separate database.
+Each base-URI constitutes a separate database.
 
 ```
 http://example.com` # database 1
@@ -107,7 +107,9 @@ The xqerl database can store
 
 Create Read Update Delete
 
-### `xq put {path}`
+### Create
+
+`xq put {file-path}`
 
 Given a path argument, 
 the put command stores a file as a XDM item into the database, 
@@ -128,16 +130,21 @@ part of the db stored location uri
     │           ├── employees.xml -> *item uri*: http://example/examples/employees.xml
 ```
 
+*example*: store employees data into xqerl database
 
 ```
 > xq put example.com/examples/employees.xml
  - ok: stored into db
  - XDM item: document-node
  - location: http://example.com/examples/employees.xml
- ```
+```
 
 The xqerl database can store other XDM items beside XML documents as a document-nodes.
 Lets store some JSON documents.
+
+*example*: 
+ 1. with 'mildred' JSON file store this contact data into db
+ 2. with 'colors' JSON file store this list of colors data into db
 
 ```
 > xq put src/data/example.com/examples/mildred.json
@@ -154,7 +161,9 @@ As you can see from the output the 'mildred.json' doc is now a xqerl db stored
 'map' item and the 'colors.json' doc is now a xqerl db stored 'map' item. 
 Other data sources can be converted into XDM items.
 
-**CSV** data is stored as an array item via the csv module
+**CSV* **example*: 
+ with entry_exit.csv store this data into db as array.
+
 ```
 > xq put src/data/example.com/examples/entry_exit.csv
  - ok: stored into db
@@ -162,9 +171,29 @@ Other data sources can be converted into XDM items.
  - location: http://example.com/examples/entry_exit.array
 ```
 
- **Markdown**  documents are stored as an document-node item. 
- The document-node item is the result of markdown src piped thru a dockerized 
-cmark with the -to xml flag set.  The cmark location extension is a arbitrary construct
+#### Using dockerized helpers
+
+With some dockerized helpers, we can store other data as XDM items.
+ Remember if we can turn our data source into db stored XDM items,
+ then the full drill down, filter, extract and manipulate power of 
+ xPath and XQuery is available. 
+
+ ##### [CommonMark](https://commonmark.org/) to XML
+
+ *note*: cmark is the tool github uses to convert this README
+  into HTML
+
+A [dockerized](https://github.com/grantmacken/alpine-cmark)
+ [cmark](https://github.com/commonmark/cmark) can produce the
+ intermediate cmark AST which is represented as a XML document.
+ cmark uses the AST an intermediate stage to generate the HTML representation.
+ We can stay with the produced AST XML representaion,
+ and from this directly generate our HTML using xQuery.
+
+**** *example*: 
+ with index.md convert into
+ [cmark XML](https://github.com/commonmark/commonmark-spec/blob/master/CommonMark.dtd) 
+ then store into db as a **document-node**.
 
 ```
 > xq put src/data/example.com/content/index.md
@@ -173,8 +202,18 @@ cmark with the -to xml flag set.  The cmark location extension is a arbitrary co
  - location: http://example.com/content/index.cmark
 ```
 
- **HTML** documents are stored as an document-node item. The document-node item is the result 
-of a HTML src piped thru a dockerized tidyhtml5 with flags set to produce XML.
+Note: the cmark extension is an arbitrary construct. 
+Note: TODO! - another section on cmark XML to HTML conversion using xQuery
+modules
+
+##### [html-tidy](https://www.html-tidy.org/) HTML to XML
+
+A [dockerized htmltidy](https://github.com/grantmacken/alpine-htmltidy)
+ can produce from a HTML source, a well formed XML document. 
+
+**** *example*: 
+ with hello-world.html convert into well-formed XML, 
+ then store into db as a **document-node**.
 
 ```
 > xq put src/data/example.com/examples/hello-world.html
@@ -182,6 +221,9 @@ of a HTML src piped thru a dockerized tidyhtml5 with flags set to produce XML.
  - XDM item: document-node
  - location: http://example.com/examples/hello-world.xhtml
 ```
+
+Note: the xhtml extension is an arbitrary construct
+
 
 ### `xq list {path}`
 
@@ -294,18 +336,19 @@ Jane Doe 13 - active
 example: total hours worked
 
 ```
-> xq get example.com/examples/works.xml '//employee' '=> sum() => string()'
+> xq get example.com/examples/works.xml '//employee/hours' '=> sum() => string()'
 592
 ```
 
 #### Get: specific to arrays and maps 
 
-- command `xq get {db-uri} {lookup_expr}`,
-  will apply a object lookup to get the retrieved **map** or **array**,
-  and returns a serialized JSON string.
+- command `xq get {db-uri} {lookup}`,
 
-The example below gets a map item and applies a lookup expression to get 
-Mildreds address details.
+Get **map** or **array**,
+ then use lookup expression
+ to return object as a serialized JSON string.
+
+*examples* with the Mildred map drill down to get address and town
 
 ```
 > xq get example.com/examples/mildred.map '?address'
