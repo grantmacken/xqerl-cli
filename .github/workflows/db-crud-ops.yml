@@ -54,9 +54,6 @@ jobs:
           echo '> xq put example.com/examples/works.xml'
           xq put example.com/examples/works.xml
           printf %60s | tr ' ' '-' && echo
-          echo '> xq put example.com/examples/employees.xml'
-          xq put example.com/examples/employees.xml
-          printf %60s | tr ' ' '-' && echo
           echo '> xq put example.com/examples/mildred.json'
           xq put example.com/examples/mildred.json
           printf %60s | tr ' ' '-' && echo
@@ -89,6 +86,10 @@ jobs:
           xq available example.com/examples/colors.array 
       - name:  Read [ xq get {db-uri} ]
         run: |
+          echo ' - create employees data'
+          echo '> xq put example.com/examples/employees.xml'
+          xq put example.com/examples/employees.xml
+          printf %60s | tr ' ' '-' && echo
           echo '> xq get example.com/examples/employees.xml'
           xq get example.com/examples/employees.xml 
           printf %60s | tr ' ' '-' && echo

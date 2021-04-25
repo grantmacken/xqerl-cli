@@ -283,7 +283,7 @@ http://example.com/examples/mildred.map
 
 #### Available
 
-`xq list {db-path}`
+Command `xq available {db-uri}`
 
 *example*: is colors.array available in db
 
@@ -368,7 +368,8 @@ Get document node,
 
 *example*: extract first employees name
 ```
-> xq get example.com/examples/employees.xml '//employee[1]/name/string()'
+> xq get example.com/examples/employees.xml \
+> '//employee[1]/name/string()'
 Charles Madigen
 ```
 
