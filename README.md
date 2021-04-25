@@ -102,11 +102,11 @@ The xqerl database can store
 
 2. links A db *link* is a reference to binary or unparsed text file on the containers file system
 
-# xqerl database CRUD operations
+## xqerl database CRUD operations
 
 Create Read Update Delete
 
-## Create
+### Create
 
  - `xq put {file-path}`
  - `xq plonk {file-path}` TODO! put unparsed text into db
@@ -231,15 +231,13 @@ A [dockerized htmltidy](https://github.com/grantmacken/alpine-htmltidy)
 Note: the xhtml extension is an arbitrary construct
 
 
-#### Plonk
-
-TODO!
-
 #### Link
 
 TODO!
 
+#### Plonk
 
+TODO!
 
 
 ### Read 
