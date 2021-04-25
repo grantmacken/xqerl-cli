@@ -102,7 +102,9 @@ The xqerl database can store
 
 2. links A db *link* is a reference to binary or unparsed text file on the containers file system
 
-## xqerl database CRUD operations
+## xqerl database 
+ [CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete) 
+ ops with xq
 
 Create Read Update Delete
 

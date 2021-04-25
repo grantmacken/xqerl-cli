@@ -49,7 +49,7 @@ jobs:
       - name:  Create Read Update Delete
         run: |
           echo ' create: put | link | plonk'
-      - name: Create With Put
+      - name: Create [ xq put ]
         run: |
           echo '> xq put example.com/examples/works.xml'
           xq put example.com/examples/works.xml
@@ -71,12 +71,20 @@ jobs:
           echo '> xq put src/data/example.com/examples/hello-world.html'
           xq put src/data/example.com/examples/hello-world.html
           printf %60s | tr ' ' '-' && echo
-      - name: Create [ 'xq link' ]
+      - name: Create [ 'xq link' ] TODO
         run: echo 'TODO'
-      - name: Create [ 'xq plonk' ] 
+      - name: Create [ 'xq plonk' ] TODO
         run: echo 'TODO'
-      - name: Read 
-        run: echo "TODO"
+      - name: Read xq CRUD ops
+        run: echo "list, available, get, collect"
+      - name:  Read [ xq list ]
+        run: |
+          echo '> xq list example.com/examples'
+          xq list example.com/examples 
+      - name:  Read [ xq available {db-uri} ]
+        run: |
+          echo '> xq available example.com/examples/colors.array'
+          xq available example.com/examples/colors.array 
       - name:  get db item
         run: |
           echo '> xq get example.com/examples/works.xml'
