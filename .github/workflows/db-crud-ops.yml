@@ -63,6 +63,14 @@ jobs:
           echo '> xq put src/data/example.com/examples/entry_exit.csv'
           xq put src/data/example.com/examples/entry_exit.csv
           printf %60s | tr ' ' '-' && echo
+      - name: Create: xq put with preprocess dockerized helpers
+        run: |
+          echo '> xq put src/data/example.com/content/index.md'
+          xq put src/data/example.com/content/index.md
+          printf %60s | tr ' ' '-' && echo
+          echo '> xq put src/data/example.com/examples/hello-world.html'
+          xq put src/data/example.com/examples/hello-world.html
+          printf %60s | tr ' ' '-' && echo
       - name:  get db item
         run: |
           echo '> xq get example.com/examples/works.xml'
