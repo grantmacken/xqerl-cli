@@ -54,6 +54,7 @@ jobs:
           echo ' - create employees data'
           echo '> xq put example.com/examples/employees.xml'
           xq put example.com/examples/employees.xml
+          echo ' - create works data'
           echo '> xq put example.com/examples/works.xml'
           xq put example.com/examples/works.xml
           printf %60s | tr ' ' '-' && echo
@@ -80,6 +81,25 @@ jobs:
         run: echo 'TODO'
       - name: Read xq CRUD ops
         run: echo "list, available, get, collect"
+      - name:  Read [ xq list {db-uri} ]
+        run: |
+          echo '> xq list example.com/examples'
+          xq list example.com/examples 
+      - name:  Read [ xq availabe {db-uri} ]
+        run: |
+          echo '> xq available example.com/examples/colors.array'
+          xq available example.com/examples/colors.array 
+      - name:  Read [ xq get {db-uri} ]
+        run: |
+          echo '> xq get example.com/examples/employees.xml'
+          xq get example.com/examples/employees.xml 
+          printf %60s | tr ' ' '-' && echo
+          echo '> xq get example.com/examples/colors.array'
+          xq get example.com/examples/colors.array
+          printf %60s | tr ' ' '-' && echo
+          echo '> xq get example.com/examples/mildred.map'
+          xq get example.com/examples/mildred.map
+          printf %60s | tr ' ' '-' && echo
           
 
 
