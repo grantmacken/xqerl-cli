@@ -230,9 +230,6 @@ A [dockerized htmltidy](https://github.com/grantmacken/alpine-htmltidy)
 
 Note: the xhtml extension is an arbitrary construct
 
-
-#### Link
-
 TODO!
 
 #### Plonk
@@ -245,13 +242,16 @@ TODO!
  - `xq list {db-uri}`
  - `xq available {db-uri}`
  - `xq get {db-uri}`
- - `xq get {db-uri} {xpath}`
- - `xq get {db-uri} {lookup}`
- 
+ - `xq get {db-uri} {xpath-or-lookup}`
+ - `xq get {db-uri} {xpath-or-lookup} {bang-or-arrow}`
+
+ TODO:
+  
+- [ ] `xq collect {db-uri}`
 
 #### List
 
-`xq list {db-path}`
+Command: `xq list {db-uri}`
 
 *example*: lists items available in 'examples' collection
 
@@ -333,7 +333,7 @@ true
 ]
 ```
 
-#### Get Then 
+#### Get Item Then 
  
 With db uri, 
  get **XDM** item
