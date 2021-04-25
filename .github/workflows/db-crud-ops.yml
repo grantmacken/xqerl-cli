@@ -54,6 +54,9 @@ jobs:
           echo '> xq put example.com/examples/works.xml'
           xq put example.com/examples/works.xml
           printf %60s | tr ' ' '-' && echo
+          echo '> xq put example.com/examples/employees.xml'
+          xq put example.com/examples/employees.xml
+          printf %60s | tr ' ' '-' && echo
           echo '> xq put example.com/examples/mildred.json'
           xq put example.com/examples/mildred.json
           printf %60s | tr ' ' '-' && echo
@@ -81,6 +84,9 @@ jobs:
         run: |
           echo '> xq list example.com/examples'
           xq list example.com/examples 
+        run: |
+          echo '> xq available example.com/examples/colors.array'
+          xq available example.com/examples/colors.array 
       - name:  Read [ xq get {db-uri} ]
         run: |
           echo '> xq get example.com/examples/employees.xml'
@@ -97,10 +103,14 @@ jobs:
           echo '> xq get example.com/examples/employees.xml'
           xq get example.com/examples/employees.xml 
           printf %60s | tr ' ' '-' && echo
-      - name:  Read [ xq available {db-uri} ]
+      - name:  Read [ xq get {db-uri} {xpath} ]
         run: |
-          echo '> xq available example.com/examples/colors.array'
-          xq available example.com/examples/colors.array 
+          echo '> xq get example.com/examples/employees.xml \'
+          echo "> '//employee[1]/name/string()'"
+          xq get example.com/examples/employees.xml \
+          '//employee[1]/name/string()'
+          printf %60s | tr ' ' '-' && echo
+      - name:  Read [ xq available {db-uri} ]
       - name:  get db item
         run: |
           echo '> xq get example.com/examples/works.xml'
