@@ -100,6 +100,18 @@ jobs:
           echo '> xq get example.com/examples/mildred.map'
           xq get example.com/examples/mildred.map
           printf %60s | tr ' ' '-' && echo
+      - name:  Read [ xq get {db-uri} {xpath} ]
+        run: |
+          echo '> xq get example.com/examples/employees.xml \'
+          echo "> '//employee[1]/name/string()'"
+          xq get example.com/examples/employees.xml \
+          '//employee[1]/name/string()'
+      - name:  Read [ xq get {db-uri} {lookup} ]
+        run: |
+          echo '> xq get example.com/examples/mildred.map \' 
+          echo "> '?address?town'"
+          xq get example.com/examples/mildred.map '?address?town'
+          
           
 
 
