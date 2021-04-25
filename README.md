@@ -225,9 +225,17 @@ A [dockerized htmltidy](https://github.com/grantmacken/alpine-htmltidy)
 Note: the xhtml extension is an arbitrary construct
 
 
-### `xq list {path}`
+### Read 
 
-Lists items available in collections
+ - list
+ - available
+ - 
+
+#### List
+
+`xq list {db-path}`
+
+*example*: lists items available in 'examples' collection
 
 ```
 > xq list example.com/examples
@@ -239,7 +247,18 @@ http://example.com/examples/entry_exit.array
 http://example.com/examples/mildred.map
 ```
 
-###  Get database items
+#### Available
+
+`xq list {db-path}`
+
+*example*: is colors.array available in db
+
+```
+> xq available example.com/examples/colors.array
+true
+``` 
+
+#### Get Item
 
 - `xq get {db-uri}` 
  where the arg {db-uri} is an item in the database
@@ -296,29 +315,37 @@ http://example.com/examples/mildred.map
 ]
 ```
 
-#### Get: specific to document nodes
+#### Get Then 
+ 
+With db uri, 
+ get **XDM** item
+ then depending on item
+ use **xPath** or **lookup** expression to drill down or filter,
+ then optionally use 'arrow' or 'bang' to modify,
+ to return serialized item or items
 
-- command `xq get {db-uri} {xpath}`
+##### document node commands 
 
- Get **document node**,
- then get node with xpath expression,
+`xq get {db-uri} {xpath}`
+
+Get document node,
+ then apply xpath expression,
  to return a serialized XML string.
 
-example: extract first employees name
-
+*example*: extract first employees name
 ```
 > xq get example.com/examples/employees.xml '//employee[1]/name/string()'
 Charles Madigen
 ```
 
-- command `xq get {db-uri} {xpath} {bang}`
+Command: `xq get {db-uri} {xpath} {bang}`
 
- Get **document node**,
- then get nodes with xpath expression,
+ Get document node,
+ then apply xpath expression,
  then use bang (simple map expression)
  to return result.
 
-example: list active employees
+*example*: list active employees
 ```
 > xq get example.com/examples/works.xml \
 > '//employee[./status ="active"]' \
@@ -326,30 +353,28 @@ example: list active employees
 Jane Doe 13 - active
 ```
 
-- command `xq get {db-uri} {xpath} {arrow}`
+Command: `xq get {db-uri} {xpath} {arrow}`
 
- Get **document node**,
+ Get document node,
  then get nodes with xpath expression,
  then use arrow expression
  to return result.
 
-example: total hours worked
-
+*example*: total hours worked
 ```
 > xq get example.com/examples/works.xml '//employee/hours' '=> sum() => string()'
 592
 ```
 
-#### Get: specific to arrays and maps 
+##### array and map commands
 
-- command `xq get {db-uri} {lookup}`,
+Command: `xq get {db-uri} {lookup}`
 
 Get **map** or **array**,
  then use lookup expression
  to return object as a serialized JSON string.
 
 *examples* with the Mildred map drill down to get address and town
-
 ```
 > xq get example.com/examples/mildred.map '?address'
 {"county":"Oxfordshire","postcode":"OX6 3PD","street":"91 High Street","town":"Biscester"}
@@ -357,7 +382,7 @@ Get **map** or **array**,
 "Biscester"
 ```
 
-- `xq get {db-uri} {lookup_expr} {bang_expr}` 
+Command: `xq get {db-uri} {lookup_expr} {bang_expr}` 
 
  Get **map** or **array**,
  then get object with lookup,
@@ -375,14 +400,13 @@ Get **map** or **array**,
  "Turquoise"]
 ```
 
-- command `xq get {db-uri} {bang-expr}`
+Command: `xq get {db-uri} {bang-expr}`
 
- Get **map** or **array**,
+Get **map** or **array**,
  then use bang expression
  to return a serialized JSON string.
 
 *example*: format Mildreds' name 
-
 ```
 > xq get example.com/examples/mildred.map '! ``[ `{.?firstname}` `{.?lastname}`]``'
  Mildred Moore
