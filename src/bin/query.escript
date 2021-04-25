@@ -8,13 +8,19 @@ xqError( RES ) ->
   Msg =  "ERROR: " ++ binary_to_list(element(3,RES)) ++ "\n",
   io:format( "~s\n", [ Msg ]).
 
+printOutList( BinList ) ->
+  NormalList = [binary_to_list(X) || X <- BinList],
+ io:fwrite("~1p~n",[NormalList]).
+
+
+
 printOutRes( Res ) ->
   case Res of
    Etup when is_tuple(Etup), element(1, Etup) == xqError  -> xqError(Etup);
    Number when is_number(Number) -> io:format( "~p\n", [ Res ]);
    Binary when is_binary(Binary)  -> io:format( "~s\n", [ Res ] );
    Array when is_tuple(Array),element(1, Array)  -> io:format( "~s\n", [ 'array' ]);
-   List when is_list(List)  -> io:format( "\n", [ List ] );
+   List when is_list(List)  ->  printOutList(List) ;
    _  -> io:format( "~p\n",[ Res ])
  end.
 

@@ -20,10 +20,17 @@ xq Create Read Update Delete (CRUD) commands for working with xqerl database
 db location URI 
  - [x] `xq link {srcFile}` given *domain* and *srcFile*, **create** a db link 
 to a binary or unparsed text file then return db location URI 
- - [x] `xq get {db-uri}` given *db-uri*, return serialized db XDM item
  - [x] `xq list {db-uri}` given *db-uri*, return uri list of db resources
  - [x] `xq available {db-uri}` given *db-uri*, return true or false
  - [ ] `xq type {db-uri}` given *db-uri*, return the db XDM type
+ - [x] `xq get {db-uri}` given *db-uri*, return serialized db XDM item
+ - [x] `xq get {db-uri}` `{xpath}` given *db-uri* and *xpath* expression, return serialized XML string
+ - [ ] `xq get {db-uri}` `{lookup}` given *db-uri* and *lookup* expression, return serialized JSON item
+ - [ ] `xq collect {db-collection-uri}` given *db-collection-uri*,  collect sequence, return serialized items
+ - [ ] `xq collect {db-collection-uri}` `{simple map expression}`  
+  given *db-collection-uri*, collect sequence, apply bang expression then return  return serialized items
+ - [ ] `xq collect {db-collection-uri}` `{arrow expression}`  given *db-collection-uri*,  return serialized db XDM items
+  given *db-collection-uri*, collect sequence, apply arrow expression then return serialized item or items 
  - [x] `xq update {db-uri} {update-expression}` given *db-uri* and 
 *update-expression*, **update** XML resource, then return true or false
  - [x] `xq delete {db-uri}` given *db-uri*, **delete** item, then return true 
@@ -88,7 +95,7 @@ Each database contains collections of items referenced as URIs.
 - db **collection**  http://example/examples  
 - db **item** http://example/examples/employees.xml 
 
-## db items
+## xqerl database items
 
 The xqerl database can store 
 
@@ -96,7 +103,7 @@ The xqerl database can store
 
 2. links A db *link* is a reference to binary or unparsed text file on the containers file system
 
-## xqerl database CRUD operations with `xq`
+## xqerl database CRUD operations
 
 Create Read Update Delete
 
@@ -104,11 +111,11 @@ Create Read Update Delete
 
 Given a path argument, 
 the put command stores a file as a XDM item into the database, 
-then returns the location of the stored file
+then returns the location of the stored file.
 
-By convention all the data source are in the src/data directory
-so the path can either start with a 'domain' name 
-e.g. example.com/examples/employees.xml or use the full path src/data/example.com/examples/employees.xml.
+By convention all the data sources are in the `src/data` directory
+so a path can either start with a 'domain' name 
+e.g. `example.com/examples/employees.xml` or use the full path `src/data/example.com/examples/employees.xml`.
 What ever the case the path must include the domain name, as the domain name becomes the base-uri 
 part of the db stored location uri
 
@@ -143,12 +150,11 @@ Lets store some JSON documents.
  - location: http://example.com/examples/colors.array
  ```
 
-As you can see from the output the 'mildred.json' doc a now a xqerl db stored 'map' item
-and the 'colors.json' doc a now a xqerl db stored 'map' item.
+As you can see from the output the 'mildred.json' doc is now a xqerl db stored 
+'map' item and the 'colors.json' doc is now a xqerl db stored 'map' item. 
+Other data sources can be converted into XDM items.
 
-Other data sources can be converted into XDM items
-
-**CSV** stored as an array item via the csv module
+**CSV** data is stored as an array item via the csv module
 ```
 > xq put src/data/example.com/examples/entry_exit.csv
  - ok: stored into db
@@ -156,7 +162,9 @@ Other data sources can be converted into XDM items
  - location: http://example.com/examples/entry_exit.array
 ```
 
- **markdown** stored as an document-node item. The document-node item is the result of markdown src ran thru a dockerized cmark with the -to xml flag set. 
+ **Markdown**  documents are stored as an document-node item. 
+ The document-node item is the result of markdown src piped thru a dockerized 
+cmark with the -to xml flag set.  The cmark location extension is a arbitrary construct
 
 ```
 > xq put src/data/example.com/content/index.md
@@ -164,17 +172,176 @@ Other data sources can be converted into XDM items
  - XDM item: document-node
  - location: http://example.com/content/index.cmark
 ```
- The cmark extension is a arbitrary construct, so I know is a XML doc produced
- by cmark. 
 
- **html** stored as an document-node item. The document-node item is the result of a html src ran thru a dockerized tidyhtml5 with flags set to produce XML.
+ **HTML** documents are stored as an document-node item. The document-node item is the result 
+of a HTML src piped thru a dockerized tidyhtml5 with flags set to produce XML.
 
 ```
 > xq put src/data/example.com/examples/hello-world.html
  - ok: stored into db
  - XDM item: document-node
  - location: http://example.com/examples/hello-world.xhtml
+```
 
+### `xq list {path}`
 
+Lists items available in collections
 
+```
+> xq list example.com/examples
+http://example.com/examples/employees.xml
+http://example.com/examples/hello-world.xhtml
+http://example.com/examples/works.xml
+http://example.com/examples/colors.array
+http://example.com/examples/entry_exit.array
+http://example.com/examples/mildred.map
+```
+
+###  Get database items
+
+- `xq get {db-uri}` 
+ where the arg {db-uri} is an item in the database
+ The command returns a serialized representation of a item.
+ For document-nodes this will be a XML string.
+ For arrays or maps this will be a JSON string.
+
+ *example*: get a document-node 
+
+```
+> xq get example.com/examples/employees.xml
+<employees>
+    <employee>
+        <employeeId>4</employeeId>
+        <reportsTo>1</reportsTo>
+        <name>Charles Madigen</name>
+        <job>Chief Operating Officer</job>
+        <Phone>x10962</Phone>
+        <email>cmadigan@example.com</email>
+        <department>Management</department>
+        <salary>26200.00</salary>
+        <gender>male</gender>
+        <maritalStatus>married</maritalStatus>
+        <employeeType>full time</employeeType>
+    </employee>
+</employees>
+```
+
+*example*: get an array item
+```
+> xq get example.com/examples/colors.array | jq '.'
+[
+  {
+    "color": "Green"
+  },
+  {
+    "color": "Pink"
+  },
+  {
+    "color": "Lilac"
+  },
+  {
+    "color": "Turquoise"
+  },
+  {
+    "color": "Peach"
+  },
+  {
+    "color": "Opal"
+  },
+  {
+    "color": "Champagne"
+  }
+]
+```
+
+#### Get: specific to document nodes
+
+- command `xq get {db-uri} {xpath}`
+
+ Get **document node**,
+ then get node with xpath expression,
+ to return a serialized XML string.
+
+example: extract first employees name
+
+```
+> xq get example.com/examples/employees.xml '//employee[1]/name/string()'
+Charles Madigen
+```
+
+- command `xq get {db-uri} {xpath} {bang}`
+
+ Get **document node**,
+ then get nodes with xpath expression,
+ then use bang (simple map expression)
+ to return result.
+
+example: list active employees
+```
+> xq get example.com/examples/works.xml \
+> '//employee[./status ="active"]' \
+> '! concat(./@name/string(), " - " , ./status/string())'
+Jane Doe 13 - active
+```
+
+- command `xq get {db-uri} {xpath} {arrow}`
+
+ Get **document node**,
+ then get nodes with xpath expression,
+ then use arrow expression
+ to return result.
+
+example: total hours worked
+
+```
+> xq get example.com/examples/works.xml '//employee' '=> sum() => string()'
+592
+```
+
+#### Get: specific to arrays and maps 
+
+- command `xq get {db-uri} {lookup_expr}`,
+  will apply a object lookup to get the retrieved **map** or **array**,
+  and returns a serialized JSON string.
+
+The example below gets a map item and applies a lookup expression to get 
+Mildreds address details.
+
+```
+> xq get example.com/examples/mildred.map '?address'
+{"county":"Oxfordshire","postcode":"OX6 3PD","street":"91 High Street","town":"Biscester"}
+> xq get example.com/examples/mildred.map '?address?town'
+"Biscester"
+```
+
+- `xq get {db-uri} {lookup_expr} {bang_expr}` 
+
+ Get **map** or **array**,
+ then get object with lookup,
+ then use bang expression
+ to return a serialized JSON string.
+
+*example*: list colors without Lilac
+```
+> xq get example.com/examples/colors.array '?*' '! ( .?color[not(. = "Lilac")] )'
+["Champagne",
+ "Green",
+ "Opal",
+ "Peach",
+ "Pink",
+ "Turquoise"]
+```
+
+- command `xq get {db-uri} {bang-expr}`
+
+ Get **map** or **array**,
+ then use bang expression
+ to return a serialized JSON string.
+
+*example*: format Mildreds' name 
+
+```
+> xq get example.com/examples/mildred.map '! ``[ `{.?firstname}` `{.?lastname}`]``'
+ Mildred Moore
+```
 
