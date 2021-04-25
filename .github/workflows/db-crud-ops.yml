@@ -49,8 +49,11 @@ jobs:
       - name:  Create Read Update Delete
         run: |
           echo ' create: put | link | plonk'
-      - name: Create [ xq put ]
+      - name: Create [ xq put {file} ]
         run: |
+          echo ' - create employees data'
+          echo '> xq put example.com/examples/employees.xml'
+          xq put example.com/examples/employees.xml
           echo '> xq put example.com/examples/works.xml'
           xq put example.com/examples/works.xml
           printf %60s | tr ' ' '-' && echo
@@ -71,126 +74,12 @@ jobs:
           echo '> xq put src/data/example.com/examples/hello-world.html'
           xq put src/data/example.com/examples/hello-world.html
           printf %60s | tr ' ' '-' && echo
-      - name: Create [ 'xq link' ] TODO
+      - name: Create [ xq link ] TODO
         run: echo 'TODO'
-      - name: Create [ 'xq plonk' ] TODO
+      - name: Create [ xq plonk ] TODO
         run: echo 'TODO'
       - name: Read xq CRUD ops
         run: echo "list, available, get, collect"
-      - name:  Read [ xq list {db-uri} ]
-        run: |
-          echo '> xq list example.com/examples'
-          xq list example.com/examples 
-        run: |
-          echo '> xq available example.com/examples/colors.array'
-          xq available example.com/examples/colors.array 
-      - name:  Read [ xq get {db-uri} ]
-        run: |
-          echo ' - create employees data'
-          echo '> xq put example.com/examples/employees.xml'
-          xq put example.com/examples/employees.xml
-          printf %60s | tr ' ' '-' && echo
-          echo '> xq get example.com/examples/employees.xml'
-          xq get example.com/examples/employees.xml 
-          printf %60s | tr ' ' '-' && echo
-          echo '> xq get example.com/examples/colors.array'
-          xq get example.com/examples/colors.array
-          printf %60s | tr ' ' '-' && echo
-          echo '> xq get example.com/examples/mildred.map'
-          xq get example.com/examples/mildred.map
-          printf %60s | tr ' ' '-' && echo
-      - name:  Read [ xq get {db-uri} ]
-        run: |
-          echo '> xq get example.com/examples/employees.xml'
-          xq get example.com/examples/employees.xml 
-          printf %60s | tr ' ' '-' && echo
-      - name:  Read [ xq get {db-uri} {xpath} ]
-        run: |
-          echo '> xq get example.com/examples/employees.xml \'
-          echo "> '//employee[1]/name/string()'"
-          xq get example.com/examples/employees.xml \
-          '//employee[1]/name/string()'
-          printf %60s | tr ' ' '-' && echo
-      - name:  Read [ xq available {db-uri} ]
-      - name:  get db item
-        run: |
-          echo '> xq get example.com/examples/works.xml'
-          xq get example.com/examples/works.xml 
-          printf %60s | tr ' ' '-' && echo
-      - name:  get db document node item, apply xPath expression
-        run: |
-          echo "> xq get example.com/examples/works.xml '//employee[1]'"
-          xq get example.com/examples/works.xml '//employee[3]'
-          printf %60s | tr ' ' '-' && echo
-      - name:  the XQuery Update Facility
-        run: |
-          echo '@see https://www.xmlmind.com/tutorials/XQueryUpdate/index.html'
-          echo ' xq update {db-uri} [ insert replace delete rename]'
-      - name:  update db document, with insert expression
-        run: |
-          echo ' insert expression examples'
-          echo ' - check employee[3] details'
-          echo "> xq update example.com/examples/works.xml '//employee[3]'"
-          echo ' - check hours worked'
-          echo "> xq get example.com/examples/works.xml '//employee[3]/hours => sum()"
-          xq get example.com/examples/works.xml '//employee[3]/hours => sum()'
-          printf %60s | tr ' ' '-' && echo
-          echo ' - add more hours for employee[3]'
-          echo "> xq update example.com/examples/works.xml insert node '<hours>40</hours>' into '//employee[3]'"
-          xq update example.com/examples/works.xml insert node '<hours>40</hours>' into '//employee[3]'          
-          printf %60s | tr ' ' '-' && echo
-          echo ' - check result'
-          echo "> xq get example.com/examples/works.xml '//employee[3]'"
-          xq get example.com/examples/works.xml '//employee[3]'          
-          echo ' - check how many hours employee[3] has done'
-          echo "> xq get example.com/examples/works.xml '//employee[3]/hours => sum()'"
-          xq get example.com/examples/works.xml '//employee[3]/hours => sum()'
-          echo ' - check how many hours all employees have done'
-          echo "> xq get example.com/examples/works.xml '//employee/hours => sum()'"
-          xq get example.com/examples/works.xml '//employee/hours => sum()'
-          printf %60s | tr ' ' '-' && echo
-      - name:  update db document, with delete expression
-        run: |
-          echo ' update delete expression examples'
-          echo ' - check employee[2] hour details'
-          xq get example.com/examples/works.xml '//employee[2]/hours'
-          echo ' - delete first lot of hours for employee[2]'
-          echo "> xq update example.com/examples/works.xml delete node '//employee[2]/hours[1]'"
-          xq update example.com/examples/works.xml delete node '//employee[2]/hours[1]'    
-          echo ' - check  employee[2] details'
-          echo "> xq get example.com/examples/works.xml '//employee[2]'"
-          xq get example.com/examples/works.xml '//employee[2]'
-      - name:  update db document, with replace expression
-        run: |
-          echo ' update replace expression examples'
-          echo ' - check employee[1] hour details'
-          xq get example.com/examples/works.xml '//employee[1]/hours'
-          echo ' - correct the hours for employee[1]'
-          echo "> xq update example.com/examples/works.xml replace node '//employee[1]/hours[1]'  with '<hours>25</hours>'"
-          xq update example.com/examples/works.xml replace node '//employee[1]/hours[1]' with '<hours>25</hours>'
-          echo ' - update result: check employee[1] hour details'
-          xq get example.com/examples/works.xml '//employee[1]/hours'
-          echo ' - or just alter the hour value'
-          echo "> xq update example.com/examples/works.xml replace 'value of node' '//employee[1]/hours[1]' with '\"30\"'"
-          xq update example.com/examples/works.xml replace 'value of node' '//employee[1]/hours[1]' with '"30"'
-          echo ' - update result: check employee[1] hour details'
-          xq get example.com/examples/works.xml '//employee[1]/hours'
-      - name:  update db document, with rename expression
-        run: |
-          echo ' update rename expression examples'
-          echo ' - check first works node'
-          xq get example.com/examples/works.xml '/works/*[1]'
-          echo ' - rename emmployee tag to contractor'
-          echo "> xq update example.com/examples/works.xml rename node '/works/*[1]' as '\"contactor\"'"
-          xq update example.com/examples/works.xml rename node '/works/*[1]' as '"contactor"'
-          echo ' - update result: check first works node'
-          xq get example.com/examples/works.xml '/works/*[1]'
-          echo ' - update result: check contractor hours'
-          xq get example.com/examples/works.xml '//contactor/hours => sum()'
-          echo ' - update result: check employee hours'
-          xq get example.com/examples/works.xml '//employee/hours => sum()'
-          echo ' - update result: check all hours worked'
-          xq get example.com/examples/works.xml '/works/*/hours => sum()'
           
 
 
