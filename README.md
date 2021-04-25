@@ -109,8 +109,8 @@ Create Read Update Delete
 ### Create
 
  - `xq put {file-path}`
- - `xq plonk {file-path}` TODO! put unparsed text into db
  - `xq link {file-path}`
+ - `xq plonk {file-path}` TODO! put unparsed text into db
 
 
 #### Put
@@ -232,12 +232,24 @@ Note: the xhtml extension is an arbitrary construct
 
 #### Link
 
+Command: `xq link {domain} {file-path}`
+
+Given a path argument, 
+ the link command will store db link to a static asset file' 
+
+By convention all the data sources are in the `src/data` directory,
+ and it is no surprise that  *static asset* sources are 
+ located in the `./src/static-assets/` directory
+ 
+ *example* : 
+
+ ```
 TODO!
+ ```
 
 #### Plonk
 
 TODO!
-
 
 ### Read 
 
