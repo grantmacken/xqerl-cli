@@ -138,19 +138,15 @@ jobs:
           echo '> xq get example.com/examples/colors.array \' 
           echo "> '?*' \ " 
           echo "> '=>  count()' "
-          xq get example.com/examples/colors.array \
-          '?*' \ 
-          '=>  count()'
+          xq get example.com/examples/colors.array '?*' '=>  count()'
           printf %60s | tr ' ' '-' && echo
       - name:  Read [ xq get {db-uri} {lookup} {bang} ]
         run: |
           echo ' - list all colors except Lilac'
           echo '> xq get example.com/examples/colors.array \' 
-          echo "> '?*' \ " 
-          echo "> '( .?color[not(. = \"Lilac\")] )' "
+          echo "> '?*' '( .?color[not(. = \"Lilac\")] )'"
           xq get example.com/examples/colors.array \
-          '?*' \ 
-          '! ( .?color[not(. = "Lilac")] )'
+          '?*' '! (.?color[not(. = "Lilac")])'
           printf %60s | tr ' ' '-' && echo
       - name:  Read [ xq get {db-uri} {bang} ]
         run: |
@@ -161,8 +157,12 @@ jobs:
           echo '> xq get example.com/examples/mildred.map \' 
           echo "> '! ``[ `{.?firstname}` `{.?lastname}`]``'"
           xq get example.com/examples/mildred.map \
-           '! ``[ `{.?firstname}` `{.?lastname}`]``' \
+          '! ``[ `{.?firstname}` `{.?lastname}`]``'
           printf %60s | tr ' ' '-' && echo
+      - name: Read  [ xq collect {db-collection-uri} ] 
+        run: echo "TODO"
+      - name: Update xq CRUD ops
+        run: echo "TODO update subcommands"
           
 
 
