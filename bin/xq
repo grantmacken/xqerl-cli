@@ -88,8 +88,18 @@ function dbLink() {
   local baseName=$(basename $base)
   local ext="${baseName##*.}"
   local resource="${baseName%.*}"
+  if echo ${ext} | grep -oP '^(svg|js|css)$' &>/dev/null
+  then
+    docker run --rm --interactive --mount $MountAssets --entrypoint "sh" $XQERL_IMAGE \
+    -c "mkdir -p priv/static/assets/$dirName"
+  else
+   die "can not handle [ $ext ] extension"
+  fi
   if echo ${ext} | grep -oP '^(svg)$' &>/dev/null
   then
+    # ICONS
+    #########
+    echo 'handle icons'
     local filename="$XQERL_HOME/priv/static/assets/$dirName/$resource.svgz"
     local uri="http://$domain/$dirName/$resource.svgz"
     docker run --rm --interactive --mount $MountAssets --entrypoint "sh" $XQERL_IMAGE \
@@ -101,16 +111,38 @@ function dbLink() {
     docker run --rm --interactive $zopfli_img | \
     docker run --rm --interactive --mount $MountAssets --entrypoint "sh" $XQERL_IMAGE \
     -c "cat - > $filename"
+  elif echo ${ext} | grep -oP '^(woff2|woff)$' &>/dev/null
+  then
+    # FONTS
+    #########
+    echo 'handle fonts'
+  elif echo ${ext} | grep -oP '^(js)$' &>/dev/null
+  then
+    # SCRIPTS
+    ##########
+    echo 'handle scripts'
+    local filename="$XQERL_HOME/priv/static/assets/$dirName/$resource.js.gz"
+    local uri="http://$domain/$dirName/$resource.js.gz"
+    local zopfli_img='docker.pkg.github.com/grantmacken/alpine-zopfli/zopfli:0.0.1'
+    ## scripts pipeline
+    cat $srcFile | \
+    docker run --rm --interactive $zopfli_img | \
+    docker run --rm --interactive --mount $MountAssets --entrypoint "sh" $XQERL_IMAGE \
+    -c "cat - > $filename"
+  elif echo ${ext} | grep -oP '^(css)$' &>/dev/null
+  then
+    echo 'handle styles'
+  else
+    echo 'TODO default'
+  fi
+  # create link
     docker exec xq xqerl escript bin/scripts/query.escript  \
       "db:link('$filename','$uri')" &>/dev/null
     echo -n '1. file: '
     docker run --rm --interactive --mount $MountAssets --entrypoint "sh" $XQERL_IMAGE \
       -c "ls $filename"
     echo -n '2. db link: '
-    dbList http://$domain/$dirName | grep -oP "http://$domain/$dirName/$resource.svgz"
-  else
-   die "can not handle [ $ext ] extension"
-  fi
+    dbList http://$domain/$dirName | grep -oP "http://$domain/$dirName/$resource(.+)"
  }
 
 # utility for Read actions

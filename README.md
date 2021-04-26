@@ -281,6 +281,13 @@ note: links are searchable db items
 2. db link: http://example.com/icons/article.svgz
  ```
 
+*example*: create db link to gzipped js file
+ ```
+> xq link example.com scripts/prism.js
+1. file: /usr/local/xqerl/priv/static/assets/icons/article.svgz
+2. db link: http://example.com/icons/article.svgz
+ ```
+
 #### Plonk
 
 TODO!
