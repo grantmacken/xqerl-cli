@@ -156,14 +156,12 @@ jobs:
         run: |
           echo ' - just bang without the lookup'
           echo ' - format the first and last name in the mildred.map'
-        echo ' note: no lookup involved'
+          echo ' note: no lookup involved'
           printf %60s | tr ' ' '-' && echo
           echo '> xq get example.com/examples/mildred.map \' 
-          echo "'> //employee/hours' \ " 
           echo "> '! ``[ `{.?firstname}` `{.?lastname}`]``'"
-          xq get example.com/examples/works.xml \
-          '//employee/hours' \
-          '=> sum()'
+          xq get example.com/examples/mildred.map \
+           '! ``[ `{.?firstname}` `{.?lastname}`]``' \
           printf %60s | tr ' ' '-' && echo
           
 
