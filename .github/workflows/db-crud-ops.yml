@@ -51,9 +51,21 @@ jobs:
           echo '2. a db **link** to the file asset.' 
           echo ' The origin source may pass thru a "asset pipeline" ' 
           echo ' to produce a desired outcome like gzip compression' 
-          echo '*example*: create db link to compressed svgz file.'
           printf %60s | tr ' ' '-' && echo
+          echo '*example*: create db link to compressed svgz file.'
           echo '> xq link example.com icons/article.svg'
           xq link example.com icons/article.svg
+          printf %60s | tr ' ' '-' && echo
+          echo '*example*: create db link to gzipped js file'
+          echo '> xq link example.com scripts/prism.js'
+          xq link example.com scripts/prism.js
+          printf %60s | tr ' ' '-' && echo
+          echo '*example*: create db link to gzipped css file'
+          echo '> xq link example.com icons/article.svg'
+          xq link example.com icons/article.svg
+          printf %60s | tr ' ' '-' && echo
+          echo '*example*: create db link to gzipped css file'
+          echo '> xq link example.com fonts/ibm-plex-mono-v5-latin-regular.woff2'
+          xq link example.com fonts/ibm-plex-mono-v5-latin-regular.woff2
           printf %60s | tr ' ' '-' && echo
 

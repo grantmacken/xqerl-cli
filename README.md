@@ -297,8 +297,8 @@ note: links are searchable db items
 *example*: create db link to font woff file
  ```
 > xq link example.com fonts/ibm-plex-mono-v5-latin-regular.woff2
-1. file: /usr/local/xqerl/priv/static/assets/icons/article.svgz
-2. db link: http://example.com/icons/article.svgz
+1. file: /usr/local/xqerl/priv/static/assets/fonts/ibm-plex-mono-v5-latin-regular.woff2
+2. db link: http://example.com/fonts/ibm-plex-mono-v5-latin-regular.woff2
  ```
 #### Plonk
 

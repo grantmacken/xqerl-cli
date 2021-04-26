@@ -107,10 +107,11 @@ function dbLink() {
     svg)
     # ICONS
     #########
-    local filename="$XQERL_HOME/priv/static/assets/$dirName/$resource.svgz"
-    local uri="http://$domain/$dirName/$resource.svgz"
+    local res_ext='svgz'
+    local filename="$XQERL_HOME/priv/static/assets/$dirName/$resource.${res_ext}"
+    local uri="http://$domain/$dirName/$resource.${res_ext}"
     local scour_img='docker.pkg.github.com/grantmacken/alpine-scour/scour:0.0.2'
-    ## icons pipeline
+    ## icons asset pipeline
     cat $srcFile | \
     docker run --rm --interactive ${scour_img} | \
     docker run --rm --interactive $zopfli_img | \
@@ -119,9 +120,10 @@ function dbLink() {
     js)
     # SCRIPTS
     ##########
-    local filename="$XQERL_HOME/priv/static/assets/$dirName/$resource.js.gz"
-    local uri="http://$domain/$dirName/$resource.js.gz"
-    ## scripts pipeline
+    local res_ext='js.gz'
+    local filename="$XQERL_HOME/priv/static/assets/$dirName/$resource.${res_ext}"
+    local uri="http://$domain/$dirName/$resource.${res_ext}"
+    ## scripts asset pipeline
     cat $srcFile | \
     docker run --rm --interactive $zopfli_img | \
     cmdAssetsMount "cat - > $filename"
@@ -129,19 +131,21 @@ function dbLink() {
     css)
     # STYLES
     ##########
-    local filename="$XQERL_HOME/priv/static/assets/$dirName/$resource.css.gz"
-    local uri="http://$domain/$dirName/$resource.css.gz"
-    local cssnano_img='docker.pkg.github.com/grantmacken/alpine-scour/scour:0.0.2'
+    local res_ext='css.gz'
+    local filename="$XQERL_HOME/priv/static/assets/$dirName/$resource.${res_ext}"
+    local uri="http://$domain/$dirName/$resource.${res_ext}"
+    local cssnano_img='docker pull docker.pkg.github.com/grantmacken/alpine-cssnano/cssnano:0.0.3'
     cat $srcFile | \
-    docker run --rm --init --interactive  ${cssnano_img} | \
+    docker run --rm --init --interactive  ${cssnano_img} 2>/dev/null | \
     docker run --rm --interactive $zopfli_img | \
     cmdAssetsMount "cat - > $filename"
     ;;
     *) 
       # no pipeline catch
       # fonts:  woff, woff2
-    local filename="$XQERL_HOME/priv/static/assets/$dirName/$resource.${ext}"
-    local uri="http://$domain/$dirName/$resource.${ext}"
+    local res_ext=${ext}
+    local filename="$XQERL_HOME/priv/static/assets/$dirName/$resource.${res_ext}"
+    local uri="http://$domain/$dirName/$resource.${res_ext}"
     # no pipeline
     cat $srcFile | \
     cmdAssetsMount "cat - > $filename"
@@ -151,7 +155,7 @@ function dbLink() {
    echo -n '1. file: '
     cmdAssetsMount "ls $filename"
    echo -n '2. db link: '
-   dbList http://$domain/$dirName | grep -oP "http://$domain/$dirName/$resource(.+)"
+   dbList http://$domain/$dirName | grep -oP "http://$domain/$dirName/$resource.${res_ext}"
  }
 
 # utility for Read actions
