@@ -106,11 +106,13 @@ jobs:
           echo "> '//employee[1]/name/string()'"
           xq get example.com/examples/employees.xml \
           '//employee[1]/name/string()'
+          printf %60s | tr ' ' '-' && echo
       - name:  Read [ xq get {db-uri} {lookup} ]
         run: |
           echo '> xq get example.com/examples/mildred.map \' 
           echo "> '?address?town'"
           xq get example.com/examples/mildred.map '?address?town'
+          printf %60s | tr ' ' '-' && echo
       - name:  Read [ xq get {db-uri} {xpath} {bang} ]
         run: |
           echo ' - list active employees'
@@ -120,6 +122,7 @@ jobs:
           xq get example.com/examples/works.xml \
           '//employee[./status ="active"]' \
           '! concat(./@name/string(), " - " , ./status/string())'
+          printf %60s | tr ' ' '-' && echo
       - name:  Read [ xq get {db-uri} {xpath} {arrow} ]
         run: |
           echo ' - total employee hours worked'
@@ -129,6 +132,39 @@ jobs:
           xq get example.com/examples/works.xml \
           '//employee/hours' \
           '=> sum()'
+      - name:  Read [ xq get {db-uri} {lookup} {arrow} ]
+        run: |
+          echo ' - view the number of colors in the color array'
+          echo '> xq get example.com/examples/colors.array \' 
+          echo "> '?*' \ " 
+          echo "> '=>  count()' "
+          xq get example.com/examples/colors.array \
+          '?*' \ 
+          '=>  count()'
+          printf %60s | tr ' ' '-' && echo
+      - name:  Read [ xq get {db-uri} {lookup} {bang} ]
+        run: |
+          echo ' - list all colors except Lilac'
+          echo '> xq get example.com/examples/colors.array \' 
+          echo "> '?*' \ " 
+          echo "> '( .?color[not(. = \"Lilac\")] )' "
+          xq get example.com/examples/colors.array \
+          '?*' \ 
+          '! ( .?color[not(. = "Lilac")] )'
+          printf %60s | tr ' ' '-' && echo
+      - name:  Read [ xq get {db-uri} {bang} ]
+        run: |
+          echo ' - just bang without the lookup'
+          echo ' - format the first and last name in the mildred.map'
+        echo ' note: no lookup involved'
+          printf %60s | tr ' ' '-' && echo
+          echo '> xq get example.com/examples/mildred.map \' 
+          echo "'> //employee/hours' \ " 
+          echo "> '! ``[ `{.?firstname}` `{.?lastname}`]``'"
+          xq get example.com/examples/works.xml \
+          '//employee/hours' \
+          '=> sum()'
+          printf %60s | tr ' ' '-' && echo
           
 
 
