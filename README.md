@@ -274,9 +274,11 @@ container volume is mounted on the xqerl `priv/static` container directory.
 
 note: links are searchable db items
 
+*example*: create db link to compressed svgz file
  ```
-xq link example.com icons/article.svg
-TODO!
+> xq link example.com icons/article.svg
+1. file: /usr/local/xqerl/priv/static/assets/icons/article.svgz
+2. db link: http://example.com/icons/article.svgz
  ```
 
 #### Plonk

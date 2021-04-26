@@ -84,32 +84,34 @@ function dbLink() {
   local base="$(echo $2 | grep -oP '^(src/static_assets/)?\K(.+)$')"
   local srcFile="src/static_assets/$base"
   [ -e $srcFile ] || die "[ $srcFile ] unknown file"
-  local basename=$(basename -- "$base")
-  local dirname=$(dirname -- "$base")
-  local ext="${basename##*.}"
-  local resource="${basename%.*}"
-  case "$ext" in
-    svg)
-    local filename="$XQERL_HOME/priv/static/assets/$dirname/$resource.svgz"
-    local uri="http://$domain/$dirname/$resource.svgz"
+  local dirName=$(dirname $base)
+  local baseName=$(basename $base)
+  local ext="${baseName##*.}"
+  local resource="${baseName%.*}"
+  if echo ${ext} | grep -oP '^(svg)$' &>/dev/null
+  then
+    local filename="$XQERL_HOME/priv/static/assets/$dirName/$resource.svgz"
+    local uri="http://$domain/$dirName/$resource.svgz"
     docker run --rm --interactive --mount $MountAssets --entrypoint "sh" $XQERL_IMAGE \
-    -c "mkdir -p priv/static/assets/$dirname"
+    -c "mkdir -p priv/static/assets/$dirName"
+    local scour_img='docker.pkg.github.com/grantmacken/alpine-scour/scour:0.0.2'
+    local zopfli_img='docker.pkg.github.com/grantmacken/alpine-zopfli/zopfli:0.0.1'
     cat $srcFile | \
-    docker run --rm --interactive docker.pkg.github.com/grantmacken/alpine-scour/scour:0.0.2 | \
-    docker run --rm --interactive docker.pkg.github.com/grantmacken/alpine-zopfli/zopfli:0.0.1 | \
+    docker run --rm --interactive ${scour_img} | \
+    docker run --rm --interactive $zopfli_img | \
     docker run --rm --interactive --mount $MountAssets --entrypoint "sh" $XQERL_IMAGE \
     -c "cat - > $filename"
-    docker exec xq xqerl escript bin/scripts/query.escript  "db:link('$filename','$uri')" &>/dev/null
-    echo -n ' - stored in static-assets volume: '
+    docker exec xq xqerl escript bin/scripts/query.escript  \
+      "db:link('$filename','$uri')" &>/dev/null
+    echo -n '1. file: '
     docker run --rm --interactive --mount $MountAssets --entrypoint "sh" $XQERL_IMAGE \
       -c "ls $filename"
-    echo -n ' - db link to asset: '
-    dbList http://$domain/$dirname | grep -oP "http://$domain/$dirname/$resource.svgz"
-    ;;
-  *)
-    die "[ $assetType ] unknown asset type "
-  esac
-}
+    echo -n '2. db link: '
+    dbList http://$domain/$dirName | grep -oP "http://$domain/$dirName/$resource.svgz"
+  else
+   die "can not handle [ $ext ] extension"
+  fi
+ }
 
 # utility for Read actions
 function dbItemType() {

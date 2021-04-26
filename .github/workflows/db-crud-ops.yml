@@ -75,7 +75,12 @@ jobs:
           echo '> xq put src/data/example.com/examples/hello-world.html'
           xq put src/data/example.com/examples/hello-world.html
           printf %60s | tr ' ' '-' && echo
-      - name: Create [ xq link ] TODO
+      - name: Create [ xq link {domain} {path} ]
+        run: |
+          echo ' - create db link to compressed svgz file'
+          echo '> xq link example.com icons/article.svg'
+          link example.com icons/article.svg
+          printf %60s | tr ' ' '-' && echo
         run: echo 'TODO'
       - name: Create [ xq plonk ] TODO
         run: echo 'TODO'
