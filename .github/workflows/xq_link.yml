@@ -55,11 +55,11 @@ jobs:
           echo '> xq link example.com scripts/prism.js'
           xq link example.com scripts/prism.js
           printf %60s | tr ' ' '-' && echo
-          echo '*example*: create db link to gzipped css file'
-          echo '> xq link example.com icons/article.svg'
-          xq link example.com icons/article.svg
+          echo '*example*: create db link to gzipped stylesheet'
+          echo '> xq link example.com styles/index.css
+          xq link example.com styles/index.css
           printf %60s | tr ' ' '-' && echo
-          echo '*example*: create db link to gzipped css file'
+          echo '*example*: create db link to font'
           echo '> xq link example.com fonts/ibm-plex-mono-v5-latin-regular.woff2'
           xq link example.com fonts/ibm-plex-mono-v5-latin-regular.woff2
           printf %60s | tr ' ' '-' && echo
