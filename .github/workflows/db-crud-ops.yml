@@ -111,6 +111,15 @@ jobs:
           echo '> xq get example.com/examples/mildred.map \' 
           echo "> '?address?town'"
           xq get example.com/examples/mildred.map '?address?town'
+      - name:  Read [ xq get {db-uri} {xpath} {bang} ]
+        run: |
+          echo ' - list active employees'
+          echo '> xq get example.com/examples/works.xml \' 
+          echo "'> //employee[./status =\"active\"]' \ " 
+          echo "> '! concat(./@name/string(), \" - \" , ./status/string())'"
+          xq get example.com/examples/works.xml \
+          '//employee[./status ="active"]' \
+          '! concat(./@name/string(), " - " , ./status/string())'
           
           
 
