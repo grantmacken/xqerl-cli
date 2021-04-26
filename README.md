@@ -284,10 +284,23 @@ note: links are searchable db items
 *example*: create db link to gzipped js file
  ```
 > xq link example.com scripts/prism.js
+1. file: /usr/local/xqerl/priv/static/assets/scripts/prism.js.gz
+2. db link: http://example.com/scripts/prism.js.gz
+ ```
+
+*example*: create db link to gzipped css file
+ ```
+> xq link example.com scripts/index.css
 1. file: /usr/local/xqerl/priv/static/assets/icons/article.svgz
 2. db link: http://example.com/icons/article.svgz
  ```
 
+*example*: create db link to font woff file
+ ```
+> xq link example.com fonts/index.css
+1. file: /usr/local/xqerl/priv/static/assets/icons/article.svgz
+2. db link: http://example.com/icons/article.svgz
+ ```
 #### Plonk
 
 TODO!
