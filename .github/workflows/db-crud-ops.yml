@@ -85,7 +85,7 @@ jobs:
           xq link example.com scripts/prism.js
           printf %60s | tr ' ' '-' && echo
           echo '*example*: create db link to gzipped stylesheet'
-          echo '> xq link example.com styles/index.css
+          echo '> xq link example.com styles/index.css'
           xq link example.com styles/index.css
           printf %60s | tr ' ' '-' && echo
           echo '*example*: create db link to font'
