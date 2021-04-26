@@ -17,8 +17,8 @@ jobs:
         image: grantmacken/alpine-xqerl
         ports:
           - 8081:8081
-        #volumes: static-assets:/user/local/priv/static/assets'
-        #also env 
+        #volumes: use options
+        #env 
         options: >-
           --name xq
           --mount "type=volume,target=/user/local/xqerl/priv/static/assets,source=static-assets"
@@ -27,12 +27,19 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 1
-      - name: check xq container
+      - name: set up 
         run: |
-          docker ps
+          echo ' - set up xqerl project working environment'
           source .env
           echo -n ' - ${RUN_NAME} running: ' 
           docker container inspect -f '{{.State.Running}}' ${RUN_NAME}
           echo -n ' - xqerl application all started: '
           docker exec xq xqerl eval 'application:ensure_all_started(xqerl).' | grep -oP 'ok'
-          docker volume list
+          mkdir -p $HOME/.local/bin
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          pushd $HOME/.local/bin && ln -s ${GITHUB_WORKSPACE}/bin/xq && popd
+          make clean
+          make escripts
+          make main-modules
+          echo ${{ secrets.GITHUB_TOKEN }} | docker login docker.pkg.github.com --username ${GITHUB_ACTOR} --password-stdin &> /dev/null
+          make pull-container-helpers
