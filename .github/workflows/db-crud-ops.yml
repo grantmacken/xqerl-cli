@@ -14,7 +14,7 @@ jobs:
         shell: bash
     services:
        xq:
-        image: docker.pkg.github.com/grantmacken/alpine-xqerl/xq:0.0.18
+        image: grantmacken/alpine-xqerl
         ports:
           - 8081:8081
         #volumes: use options
@@ -42,7 +42,7 @@ jobs:
           make escripts
           make main-modules
           echo ${{ secrets.GITHUB_TOKEN }} | docker login docker.pkg.github.com --username ${GITHUB_ACTOR} --password-stdin &> /dev/null
-          make pull-container-helpers
+          make pull
       - name: Create [ xq link {file} ]
         run: |
           echo ' - examples of link creation'

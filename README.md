@@ -251,7 +251,6 @@ Before the asset is stored the file can be
  to get a preferred outcome. 
  For static assets this outcome usually means some form file size reduction.
 
-
 By convention all the data sources are in the `src/data` directory,
  and it is no surprise that  *static asset* sources are 
  located in the `./src/static-assets/` directory
@@ -297,7 +296,7 @@ note: links are searchable db items
 
 *example*: create db link to font woff file
  ```
-> xq link example.com fonts/index.css
+> xq link example.com fonts/ibm-plex-mono-v5-latin-regular.woff2
 1. file: /usr/local/xqerl/priv/static/assets/icons/article.svgz
 2. db link: http://example.com/icons/article.svgz
  ```
