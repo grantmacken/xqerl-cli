@@ -120,7 +120,15 @@ jobs:
           xq get example.com/examples/works.xml \
           '//employee[./status ="active"]' \
           '! concat(./@name/string(), " - " , ./status/string())'
-          
+      - name:  Read [ xq get {db-uri} {xpath} {arrow} ]
+        run: |
+          echo ' - total employee hours worked'
+          echo '> xq get example.com/examples/works.xml \' 
+          echo "'> //employee/hours' \ " 
+          echo "> '=> sum()"
+          xq get example.com/examples/works.xml \
+          '//employee/hours' \
+          '=> sum()'
           
 
 
