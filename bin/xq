@@ -42,7 +42,7 @@ MountAssets="type=volume,target=$XQERL_HOME/priv/static/assets,source=static-ass
 # helpers
 ##################
 function cmdQuery() {
-cmdQuery "$1"
+docker exec xq xqerl escript bin/scripts/query.escript "$1"
 }
 
 function cmdAssetsMount() {
@@ -107,7 +107,6 @@ function dbLink() {
     svg)
     # ICONS
     #########
-    echo 'handle icons'
     local filename="$XQERL_HOME/priv/static/assets/$dirName/$resource.svgz"
     local uri="http://$domain/$dirName/$resource.svgz"
     local scour_img='docker.pkg.github.com/grantmacken/alpine-scour/scour:0.0.2'
@@ -394,9 +393,6 @@ function doRun() {
   docker cp $srcFile xq:/usr/local/xqerl/code/src/$base 
   docker exec xq xqerl escript bin/scripts/run.escript  $1 "$2"
 }
-
-#xqerl_update:add(Ctx, {put, link, Filename, DB, Name}).
-
 
 function doRec() {
   local uri="$1"

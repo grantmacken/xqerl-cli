@@ -43,3 +43,17 @@ jobs:
           make main-modules
           echo ${{ secrets.GITHUB_TOKEN }} | docker login docker.pkg.github.com --username ${GITHUB_ACTOR} --password-stdin &> /dev/null
           make pull-container-helpers
+      - name: Create [ xq link {file} ]
+        run: |
+          echo ' - examples of link creation'
+          echo ' The `xq link` command will produce two outcomes.'
+          echo '1. a binary asset on the static-assets container volume.' 
+          echo '2. a db **link** to the file asset.' 
+          echo ' The origin source may pass thru a "asset pipeline" ' 
+          echo ' to produce a desired outcome like gzip compression' 
+          echo '*example*: create db link to compressed svgz file.'
+          printf %60s | tr ' ' '-' && echo
+          echo '> xq link example.com icons/article.svg'
+          xq link example.com icons/article.svg
+          printf %60s | tr ' ' '-' && echo
+
