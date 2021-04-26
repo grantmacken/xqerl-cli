@@ -289,9 +289,9 @@ note: links are searchable db items
 
 *example*: create db link to gzipped css file
  ```
-> xq link example.com scripts/index.css
-1. file: /usr/local/xqerl/priv/static/assets/icons/article.svgz
-2. db link: http://example.com/icons/article.svgz
+> xq link example.com src/static_assets/styles/index.css
+1. file: /usr/local/xqerl/priv/static/assets/styles/index.css.gz
+2. db link: http://example.com/styles/index.css.gz
  ```
 
 *example*: create db link to font woff file

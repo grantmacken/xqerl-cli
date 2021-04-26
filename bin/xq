@@ -134,7 +134,7 @@ function dbLink() {
     local res_ext='css.gz'
     local filename="$XQERL_HOME/priv/static/assets/$dirName/$resource.${res_ext}"
     local uri="http://$domain/$dirName/$resource.${res_ext}"
-    local cssnano_img='docker pull docker.pkg.github.com/grantmacken/alpine-cssnano/cssnano:0.0.3'
+    local cssnano_img='docker.pkg.github.com/grantmacken/alpine-cssnano/cssnano:0.0.3'
     cat $srcFile | \
     docker run --rm --init --interactive  ${cssnano_img} 2>/dev/null | \
     docker run --rm --interactive $zopfli_img | \
