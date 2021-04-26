@@ -11,7 +11,7 @@ jobs:
         image: grantmacken/alpine-xqerl
         ports:
           - 8081:8081
-        volumes: --volume static-assets:/user/local/priv/static/assets'
+        volumes: static-assets:/user/local/priv/static/assets'
         #also env 
         options: --name xq
     steps:
