@@ -41,9 +41,17 @@ MountAssets="type=volume,target=$XQERL_HOME/priv/static/assets,source=static-ass
 ##################
 # helpers
 ##################
-function Query() {
-docker exec xq xqerl escript bin/scripts/query.escript "$1"
+function cmdQuery() {
+cmdQuery "$1"
 }
+
+function cmdAssetsMount() {
+docker run --rm --interactive \
+  --mount "type=volume,target=${XQERL_HOME}/priv/static/assets,source=static-assets" \
+  --entrypoint "sh" \
+  ${XQERL_IMAGE} -c "$1"
+}
+
 
 
 #######################
@@ -90,11 +98,11 @@ function dbLink() {
   local resource="${baseName%.*}"
   if echo ${ext} | grep -oP '^(svg|js|css|woff2|woff)$' &>/dev/null
   then
-    docker run --rm --interactive --mount $MountAssets --entrypoint "sh" $XQERL_IMAGE \
-    -c "mkdir -p priv/static/assets/$dirName"
+    cmdAssetsMount "mkdir -p priv/static/assets/$dirName"
   else
    die "can not handle [ $ext ] extension"
   fi
+    local zopfli_img='docker.pkg.github.com/grantmacken/alpine-zopfli/zopfli:0.0.1'
   case "${ext}" in
     svg)
     # ICONS
@@ -102,38 +110,33 @@ function dbLink() {
     echo 'handle icons'
     local filename="$XQERL_HOME/priv/static/assets/$dirName/$resource.svgz"
     local uri="http://$domain/$dirName/$resource.svgz"
-    docker run --rm --interactive --mount $MountAssets --entrypoint "sh" $XQERL_IMAGE \
-    -c "mkdir -p priv/static/assets/$dirName"
     local scour_img='docker.pkg.github.com/grantmacken/alpine-scour/scour:0.0.2'
-    local zopfli_img='docker.pkg.github.com/grantmacken/alpine-zopfli/zopfli:0.0.1'
+    ## icons pipeline
     cat $srcFile | \
     docker run --rm --interactive ${scour_img} | \
     docker run --rm --interactive $zopfli_img | \
-    docker run --rm --interactive --mount $MountAssets --entrypoint "sh" $XQERL_IMAGE \
-    -c "cat - > $filename"
+    cmdAssetsMount "cat - > $filename"
     ;;
     js)
     # SCRIPTS
     ##########
     local filename="$XQERL_HOME/priv/static/assets/$dirName/$resource.js.gz"
     local uri="http://$domain/$dirName/$resource.js.gz"
-    local zopfli_img='docker.pkg.github.com/grantmacken/alpine-zopfli/zopfli:0.0.1'
     ## scripts pipeline
     cat $srcFile | \
     docker run --rm --interactive $zopfli_img | \
-    docker run --rm --interactive --mount $MountAssets --entrypoint "sh" $XQERL_IMAGE \
-    -c "cat  > $filename"
+    cmdAssetsMount "cat - > $filename"
     ;;
     css)
     # STYLES
     ##########
     local filename="$XQERL_HOME/priv/static/assets/$dirName/$resource.css.gz"
     local uri="http://$domain/$dirName/$resource.css.gz"
+    local cssnano_img='docker.pkg.github.com/grantmacken/alpine-scour/scour:0.0.2'
     cat $srcFile | \
-    docker run --rm --init --interactive docker.pkg.github.com/grantmacken/alpine-cssnano/cssnano:0.0.3 | \
-    docker run --rm --interactive docker.pkg.github.com/grantmacken/alpine-zopfli/zopfli:0.0.1 | \
-    docker run --rm --interactive --mount $MountAssets --entrypoint "sh" $XQERL_IMAGE \
-    -c "cat - > $filename"
+    docker run --rm --init --interactive  ${cssnano_img} | \
+    docker run --rm --interactive $zopfli_img | \
+    cmdAssetsMount "cat - > $filename"
     ;;
     *) 
       # no pipeline catch
@@ -142,15 +145,12 @@ function dbLink() {
     local uri="http://$domain/$dirName/$resource.${ext}"
     # no pipeline
     cat $srcFile | \
-    docker run --rm --interactive --mount $MountAssets --entrypoint "sh" $XQERL_IMAGE \
-    -c "cat - > $filename"
+    cmdAssetsMount "cat - > $filename"
     esac
    # create link
-   docker exec xq xqerl escript bin/scripts/query.escript  \
-      "db:link('$filename','$uri')" &>/dev/null
+    cmdQuery "db:link('$filename','$uri')" &>/dev/null
    echo -n '1. file: '
-   docker run --rm --interactive --mount $MountAssets --entrypoint "sh" $XQERL_IMAGE \
-      -c "ls $filename"
+    cmdAssetsMount "ls $filename"
    echo -n '2. db link: '
    dbList http://$domain/$dirName | grep -oP "http://$domain/$dirName/$resource(.+)"
  }
@@ -169,7 +169,7 @@ function dbGetItem() {
   then
   case "${#args[@]}" in
     2) 
-    Query \
+    cmdQuery \
     "try{('${resource}' 
     => doc()) 
     => serialize(map{'omit-xml-declaration': true() })
@@ -180,7 +180,7 @@ function dbGetItem() {
     echo ${xpath} | \
       grep -oP '^/(.+)$' &>/dev/null || \
       die 'arg  must be a xpath expression'
-    Query \
+    cmdQuery \
     "try{('${resource}' 
     => doc())${xpath} 
     => serialize(map{'omit-xml-declaration': true() })
@@ -195,7 +195,7 @@ function dbGetItem() {
     echo "${op_expr}" | \
       grep -oP '^(=>|!)(.+)$' &>/dev/null || \
       die 'arg starts with arrow or bang operator'
-    Query \
+    cmdQuery \
     "try{('${resource}' 
     => doc())${xpath} ${op_expr}
     } catch * {()}"
@@ -207,7 +207,7 @@ function dbGetItem() {
   then
   case "${#args[@]}" in
     2) 
-    Query \
+    cmdQuery \
     "try{('${resource}' 
     => db:get())
     => serialize(map{'method': 'json' })
@@ -217,14 +217,14 @@ function dbGetItem() {
     if echo "${args[2]}" | grep -oP '^[?]{1}' &>/dev/null
     then
     local lookup="${args[2]}"
-    Query \
+    cmdQuery \
     "try{('${resource}' => db:get())${lookup} 
         =>  for-each(function(\$item){ \$item => serialize(map{'method': 'json' }) } )
     } catch * {()}"
 elif echo "${args[2]}" | grep -oP '^(=>|!)' &>/dev/null
     then
     local expr="${args[2]}"
-    Query \
+    cmdQuery \
     "try{\
     ('${resource}' => db:get()) ${expr}
     } catch * {()}"
@@ -241,7 +241,7 @@ elif echo "${args[2]}" | grep -oP '^(=>|!)' &>/dev/null
     echo ${op_expr} | \
       grep -oP '^(=>|!)(.+)$' &>/dev/null || \
       die 'arg starts with arrow or bang operator'
-    Query \
+    cmdQuery \
     "try{('${resource}' 
     => db:get())${lookup} ${op_expr}
     } catch * {()}"
@@ -262,17 +262,17 @@ function dbGetItemPath() {
     document-node)
       local xpath="${args[2]}"
       echo ${xpath} | grep -oP '^/(.+)$' &>/dev/null || die 'arg [ xpath ] must be a xpath expression'
-      docker exec xq xqerl escript bin/scripts/query.escript \
+      cmdQuery \
         "try{('${resource}' => doc())${xpath} => serialize(map{'omit-xml-declaration': true() })} catch * {()}"
       ;;
     array) #TODO
       local lookup="${args[2]}"
-      docker exec xq xqerl escript bin/scripts/query.escript \
+      cmdQuery \
         "try{('$resource' => db:get()) => serialize(map{'method': 'json' })} catch * {()}"
       ;;
     map) # TODO
       local lookup="${args[2]}"
-      docker exec xq xqerl escript bin/scripts/query.escript \
+      cmdQuery \
         "try{('$resource' 
               => db:get())${lookup} 
               => serialize(map{'method': 'json'})
@@ -290,7 +290,7 @@ function dbGetLink() {
   if [ -n "$(dbList $collection | grep -oP "^${resource}$")" ]
     then
     ok "resource in db: [ $resource ]"
-    docker exec xq xqerl escript bin/scripts/query.escript  "'$resource' => db:get()" 
+    cmdQuery  "'$resource' => db:get()" 
   else
     die "resource NOT found in db: [ $resource ]"
   fi
@@ -299,14 +299,14 @@ function dbGetLink() {
 # [ list ] Read - list db uri collections
 function dbList() {
   local path="http://$(echo $1 | grep -oP '^(http://)?\K(.+)$')"
-  docker exec xq xqerl escript bin/scripts/query.escript \
+  cmdQuery \
     "try { ('$path' => uri-collection()) => string-join('&#10;') } catch * {()}" 
 }
 
 # [ available ] Read - is db item available
 function isAvailable() {
   local resource="http://$(echo $1 | grep -oP '^(http://)?\K(.+)$')"
-  docker exec xq xqerl escript bin/scripts/query.escript \
+  cmdQuery \
     "( '$resource' = ( remove( \
         '$resource' => \
         tokenize('/'),'$resource' => \
@@ -324,7 +324,7 @@ function dbUpdate() {
   local resource="http://$(echo $1 | grep -oP '^(http://)?\K(.+)$')"
   if isDocAvailable $resource &> /dev/null
   then
-    docker exec xq xqerl escript bin/scripts/query.escript \
+    cmdQuery \
       "'$resource' => doc() => serialize()"
     else die "xQuery update facilty only available for XML documents[ $ext ]"
   fi
@@ -335,12 +335,12 @@ function dbDeleteItem() {
   local resource="http://$(echo $1 | grep -oP '^(http://)?\K(.+)$')"
   if "$( isDocAvailable $resource )"
   then
-    docker exec xq xqerl escript bin/scripts/query.escript  "'$resource' => db:delete()"
+    cmdQuery  "'$resource' => db:delete()"
     ok "resource deleted from db: [ $resource ]"
   else 
     if isAvailable $resource
       then
-      docker exec xq xqerl escript bin/scripts/query.escript  "'$resource' => db:delete()" &>/dev/null
+      cmdQuery  "'$resource' => db:delete()" &>/dev/null
       ok "resource deleted from db: [ $resource ]"
     else
       die "resource NOT found in db: [ $resource ]"
@@ -361,12 +361,12 @@ function doCall() {
   }
 # utility: available XML docs
 function isDocAvailable() {
-  docker exec xq xqerl escript bin/scripts/query.escript \
+  cmdQuery \
   "try {'$1' => doc-available() => string()} catch * { 'false' }"
 }
 
 function getDoc() {
-  docker exec xq xqerl escript bin/scripts/query.escript \
+  cmdQuery \
     "'$1' => doc() => serialize(map{'omit-xml-declaration': true() })"
 }
 
@@ -401,7 +401,7 @@ function doRun() {
 function doRec() {
   local uri="$1"
   local xpath="$2"
-  docker exec xq xqerl escript bin/scripts/query.escript \
+  cmdQuery \
     "declare default element namespace 'http://www.w3.org/1999/xhtml'; \
     try{(<http:request method='get' href='$uri' /> => http:send-request())[2]${xpath} => \
     serialize()} catch * {()}"
@@ -410,7 +410,7 @@ function doRec() {
 function doLookup() {
   local uri="$1"
   local lookup="$2"
-  docker exec xq xqerl escript bin/scripts/query.escript \
+  cmdQuery \
     "try{('${uri}' => json-doc())${lookup} } catch * {()}" 
 }
 
@@ -420,7 +420,7 @@ function dbUpdateRename() {
   echo "${args[3]}" | grep -oP '^(node)$' &>/dev/null || die 'arg [ node ] must be included '
   echo "${args[4]}" | grep -oP '^/(.+)$' &>/dev/null || die 'arg [ target ] must be a xpath expression'
   echo "${args[5]}" | grep -oP '^(as)$' &>/dev/null || die 'arg [ as ] must be included'
-  docker exec xq xqerl escript bin/scripts/query.escript \
+  cmdQuery \
 "declare %updating function local:update(){
  for \$var in ('${resource}' => doc())${args[4]}
  return 
@@ -435,7 +435,7 @@ function dbUpdateReplace() {
   echo "${args[3]}" | grep -oP '^(node|value of node)$' &>/dev/null || die 'arg must be [ node | value of node ] '
   echo "${args[4]}" | grep -oP '^/(.+)$' &>/dev/null || die 'arg [ target ] must be a xpath expression'
   echo "${args[5]}" | grep -oP '^(with)$' &>/dev/null || die 'arg [ with ] must be included'
-docker exec xq xqerl escript bin/scripts/query.escript \
+cmdQuery \
     "declare %updating function local:update(){
       for \$var in ('${resource}' => doc())${args[4]}
         return replace ${args[3]} \$var with ${args[6]}
@@ -451,7 +451,7 @@ function dbUpdateDelete() {
   echo "${args[4]}" | grep -oP '^/(.+)$' &>/dev/null || die 'arg [ target ] must be a xpath expression'
   # echo ' - xQuery updating expression ' 
   # echo "> delete ${args[3]} ('${resource}' => doc())${args[4]}"
-  docker exec xq xqerl escript bin/scripts/query.escript \
+  cmdQuery \
     "declare %updating function local:update(){
       for \$var in ('${resource}' => doc())${args[4]}
         return delete ${args[3]} \$var 
@@ -472,7 +472,7 @@ function dbUpdateInsert() {
   #local xpath="${args[6]}"
   #echo ' - xQuery updating expression ' 
   #echo "> insert $qualifier $items $where ('${resource}' => doc())${xpath}"
-docker exec xq xqerl escript bin/scripts/query.escript \
+cmdQuery \
 "declare %updating function local:update(){
   for \$var in ('${resource}' => doc())${args[6]}
     return insert ${args[3]} ${args[4]} ${args[5]} \$var 
@@ -615,7 +615,7 @@ case "${args[0]}" in
   # xQuery actions [ query | compile | run ] 
   # ========================================
   query) ## {xquery-string} run a simple xQuery. example: `xq query "current-date() => string()"`
-    docker exec xq xqerl escript bin/scripts/query.escript  "${args[1]}"
+    cmdQuery  "${args[1]}"
     ;;
   req) ## {uri} {xpath} HTML doc, apply xpath expression. example: `xq req "http://example.com" "/*"`
     [[ ${#args[@]} -eq 3 ]] || die 'xq req: requires 2 params {uri} {xpath}'
@@ -653,6 +653,3 @@ case "${args[0]}" in
     help
     die 'unknown action try one of the above actions'
 esac
-
-
-
