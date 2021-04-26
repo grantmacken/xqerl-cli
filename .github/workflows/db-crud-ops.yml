@@ -79,7 +79,7 @@ jobs:
         run: |
           echo ' - create db link to compressed svgz file'
           echo '> xq link example.com icons/article.svg'
-          link example.com icons/article.svg
+          xq link example.com icons/article.svg
           printf %60s | tr ' ' '-' && echo
       - name: Create [ xq plonk ] TODO
         run: echo 'TODO'
