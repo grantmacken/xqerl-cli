@@ -2,23 +2,18 @@ name: crud_ops
 on: 
   push:
     branches:
-      - 'xq-link'
+      - 'main'
 defaults:
   run:
     shell: bash
 jobs:
   xqerl-cli-crud-ops:
     runs-on: ubuntu-latest
-    defaults: 
-      run:
-        shell: bash
     services:
        xq:
         image: grantmacken/alpine-xqerl
         ports:
           - 8081:8081
-        #volumes: use options
-        #env 
         options: >-
           --name xq
           --mount "type=volume,target=/user/local/xqerl/priv/static/assets,source=static-assets"
@@ -43,6 +38,35 @@ jobs:
           make main-modules
           echo ${{ secrets.GITHUB_TOKEN }} | docker login docker.pkg.github.com --username ${GITHUB_ACTOR} --password-stdin &> /dev/null
           make pull
+      - name:  Create Read Update Delete
+        run: |
+          echo ' create: put | link | plonk'
+      - name: Create [ xq put {file} ]
+        run: |
+          echo ' - create employees data'
+          echo '> xq put example.com/examples/employees.xml'
+          xq put example.com/examples/employees.xml
+          echo ' - create works data'
+          echo '> xq put example.com/examples/works.xml'
+          xq put example.com/examples/works.xml
+          printf %60s | tr ' ' '-' && echo
+          echo '> xq put example.com/examples/mildred.json'
+          xq put example.com/examples/mildred.json
+          printf %60s | tr ' ' '-' && echo
+          echo '> xq put src/data/example.com/examples/colors.json'
+          xq put src/data/example.com/examples/colors.json
+          printf %60s | tr ' ' '-' && echo
+          echo '> xq put src/data/example.com/examples/entry_exit.csv'
+          xq put src/data/example.com/examples/entry_exit.csv
+          printf %60s | tr ' ' '-' && echo
+      - name: Create [ xq put {file} ] with preprocess dockerized helpers
+        run: |
+          echo '> xq put src/data/example.com/content/index.md'
+          xq put src/data/example.com/content/index.md
+          printf %60s | tr ' ' '-' && echo
+          echo '> xq put src/data/example.com/examples/hello-world.html'
+          xq put src/data/example.com/examples/hello-world.html
+          printf %60s | tr ' ' '-' && echo
       - name: Create [ xq link {file} ]
         run: |
           echo ' - examples of link creation'
@@ -68,4 +92,158 @@ jobs:
           echo '> xq link example.com fonts/ibm-plex-mono-v5-latin-regular.woff2'
           xq link example.com fonts/ibm-plex-mono-v5-latin-regular.woff2
           printf %60s | tr ' ' '-' && echo
-
+      - name: Create [ xq plonk ] TODO
+        run: echo 'TODO'
+      - name: Read xq CRUD ops
+        run: echo "list, available, get, collect"
+      - name:  Read [ xq list {db-uri} ]
+        run: |
+          echo '> xq list example.com/examples'
+          xq list example.com/examples 
+      - name:  Read [ xq availabe {db-uri} ]
+        run: |
+          echo '> xq available example.com/examples/colors.array'
+          xq available example.com/examples/colors.array 
+      - name:  Read [ xq get {db-uri} ]
+        run: |
+          echo '> xq get example.com/examples/employees.xml'
+          xq get example.com/examples/employees.xml 
+          printf %60s | tr ' ' '-' && echo
+          echo '> xq get example.com/examples/colors.array'
+          xq get example.com/examples/colors.array
+          printf %60s | tr ' ' '-' && echo
+          echo '> xq get example.com/examples/mildred.map'
+          xq get example.com/examples/mildred.map
+          printf %60s | tr ' ' '-' && echo
+      - name:  Read [ xq get {db-uri} {xpath} ]
+        run: |
+          echo '> xq get example.com/examples/employees.xml \'
+          echo "> '//employee[1]/name/string()'"
+          xq get example.com/examples/employees.xml \
+          '//employee[1]/name/string()'
+          printf %60s | tr ' ' '-' && echo
+      - name:  Read [ xq get {db-uri} {lookup} ]
+        run: |
+          echo '> xq get example.com/examples/mildred.map \' 
+          echo "> '?address?town'"
+          xq get example.com/examples/mildred.map '?address?town'
+          printf %60s | tr ' ' '-' && echo
+      - name:  Read [ xq get {db-uri} {xpath} {bang} ]
+        run: |
+          echo ' - list active employees'
+          echo '> xq get example.com/examples/works.xml \' 
+          echo "'> //employee[./status =\"active\"]' \ " 
+          echo "> '! concat(./@name/string(), \" - \" , ./status/string())'"
+          xq get example.com/examples/works.xml \
+          '//employee[./status ="active"]' \
+          '! concat(./@name/string(), " - " , ./status/string())'
+          printf %60s | tr ' ' '-' && echo
+      - name:  Read [ xq get {db-uri} {xpath} {arrow} ]
+        run: |
+          echo ' - total employee hours worked'
+          echo '> xq get example.com/examples/works.xml \' 
+          echo "'> //employee/hours' \ " 
+          echo "> '=> sum()"
+          xq get example.com/examples/works.xml \
+          '//employee/hours' \
+          '=> sum()'
+      - name:  Read [ xq get {db-uri} {lookup} {arrow} ]
+        run: |
+          echo ' - view the number of colors in the color array'
+          echo '> xq get example.com/examples/colors.array \' 
+          echo "> '?*' \ " 
+          echo "> '=>  count()' "
+          xq get example.com/examples/colors.array '?*' '=>  count()'
+          printf %60s | tr ' ' '-' && echo
+      - name:  Read [ xq get {db-uri} {lookup} {bang} ]
+        run: |
+          echo ' - list all colors except Lilac'
+          echo '> xq get example.com/examples/colors.array \' 
+          echo "> '?*' '( .?color[not(. = \"Lilac\")] )'"
+          xq get example.com/examples/colors.array \
+          '?*' '! (.?color[not(. = "Lilac")])'
+          printf %60s | tr ' ' '-' && echo
+      - name:  Read [ xq get {db-uri} {bang} ]
+        run: |
+          echo ' - just bang without the lookup'
+          echo ' - format the first and last name in the mildred.map'
+          echo ' note: no lookup involved'
+          printf %60s | tr ' ' '-' && echo
+          echo '> xq get example.com/examples/mildred.map \' 
+          echo "> '! ``[ `{.?firstname}` `{.?lastname}`]``'"
+          xq get example.com/examples/mildred.map \
+          '! ``[ `{.?firstname}` `{.?lastname}`]``'
+          printf %60s | tr ' ' '-' && echo
+      - name: Read  [ xq collect {db-collection-uri} ] 
+        run: echo "TODO"
+      - name: Update xq CRUD ops
+        run: echo "TODO update subcommands"
+      - name:  the XQuery Update Facility
+        run: |
+          echo '@see https://www.xmlmind.com/tutorials/XQueryUpdate/index.html'
+          echo ' xq update {db-uri} [ insert replace delete rename ]'
+      - name:  update db document, with insert expression
+        run: |
+          echo ' insert expression examples'
+          echo ' - check employee[3] details'
+          echo "> xq update example.com/examples/works.xml '//employee[3]'"
+          echo ' - check hours worked'
+          echo "> xq get example.com/examples/works.xml '//employee[3]/hours => sum()"
+          xq get example.com/examples/works.xml '//employee[3]/hours => sum()'
+          printf %60s | tr ' ' '-' && echo
+          echo ' - add more hours for employee[3]'
+          echo "> xq update example.com/examples/works.xml insert node '<hours>40</hours>' into '//employee[3]'"
+          xq update example.com/examples/works.xml insert node '<hours>40</hours>' into '//employee[3]'          
+          printf %60s | tr ' ' '-' && echo
+          echo ' - check result'
+          echo "> xq get example.com/examples/works.xml '//employee[3]'"
+          xq get example.com/examples/works.xml '//employee[3]'          
+          echo ' - check how many hours employee[3] has done'
+          echo "> xq get example.com/examples/works.xml '//employee[3]/hours => sum()'"
+          xq get example.com/examples/works.xml '//employee[3]/hours => sum()'
+          echo ' - check how many hours all employees have done'
+          echo "> xq get example.com/examples/works.xml '//employee/hours => sum()'"
+          xq get example.com/examples/works.xml '//employee/hours => sum()'
+          printf %60s | tr ' ' '-' && echo
+      - name:  update db document, with delete expression
+        run: |
+          echo ' update delete expression examples'
+          echo ' - check employee[2] hour details'
+          xq get example.com/examples/works.xml '//employee[2]/hours'
+          echo ' - delete first lot of hours for employee[2]'
+          echo "> xq update example.com/examples/works.xml delete node '//employee[2]/hours[1]'"
+          xq update example.com/examples/works.xml delete node '//employee[2]/hours[1]'    
+          echo ' - check  employee[2] details'
+          echo "> xq get example.com/examples/works.xml '//employee[2]'"
+          xq get example.com/examples/works.xml '//employee[2]'
+      - name:  update db document, with replace expression
+        run: |
+          echo ' update replace expression examples'
+          echo ' - check employee[1] hour details'
+          xq get example.com/examples/works.xml '//employee[1]/hours'
+          echo ' - correct the hours for employee[1]'
+          echo "> xq update example.com/examples/works.xml replace node '//employee[1]/hours[1]'  with '<hours>25</hours>'"
+          xq update example.com/examples/works.xml replace node '//employee[1]/hours[1]' with '<hours>25</hours>'
+          echo ' - update result: check employee[1] hour details'
+          xq get example.com/examples/works.xml '//employee[1]/hours'
+          echo ' - or just alter the hour value'
+          echo "> xq update example.com/examples/works.xml replace 'value of node' '//employee[1]/hours[1]' with '\"30\"'"
+          xq update example.com/examples/works.xml replace 'value of node' '//employee[1]/hours[1]' with '"30"'
+          echo ' - update result: check employee[1] hour details'
+          xq get example.com/examples/works.xml '//employee[1]/hours'
+      - name:  update db document, with rename expression
+        run: |
+          echo ' update rename expression examples'
+          echo ' - check first works node'
+          xq get example.com/examples/works.xml '/works/*[1]'
+          echo ' - rename emmployee tag to contractor'
+          echo "> xq update example.com/examples/works.xml rename node '/works/*[1]' as '\"contactor\"'"
+          xq update example.com/examples/works.xml rename node '/works/*[1]' as '"contactor"'
+          echo ' - update result: check first works node'
+          xq get example.com/examples/works.xml '/works/*[1]'
+          echo ' - update result: check contractor hours'
+          xq get example.com/examples/works.xml '//contactor/hours => sum()'
+          echo ' - update result: check employee hours'
+          xq get example.com/examples/works.xml '//employee/hours => sum()'
+          echo ' - update result: check all hours worked'
+          xq get example.com/examples/works.xml '/works/*/hours => sum()'
