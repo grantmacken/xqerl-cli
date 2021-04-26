@@ -114,7 +114,6 @@ Create Read Update Delete
  - `xq link {file-path}`
  - `xq plonk {file-path}` TODO! put unparsed text into db
 
-
 #### Put
 
 `xq put {file-path}`
@@ -234,18 +233,49 @@ Note: the xhtml extension is an arbitrary construct
 
 #### Link
 
-Command: `xq link {domain} {file-path}`
+Command: `xq link {domain} {asset-path}`
 
-Given a path argument, 
- the link command will store db link to a static asset file' 
+Given a 'domain' and 'path' argument,
+ the `xq link` command creates a link in the xqerl database
+ to a preprocessed asset located on the containers file system.
+
+TODO: link to why this  is a good thing.
+
+All asset sources are located in the 
+ `./src/static_assets/` directory 
+ so the {asset-path} will be resolved as 
+ `./src/static_assets/icons/article.svg`
+
+Before the asset is stored the file can be 
+ pipelined thru docker container instances 
+ to get a preferred outcome. 
+ For static assets this outcome usually means some form file size reduction.
+
 
 By convention all the data sources are in the `src/data` directory,
  and it is no surprise that  *static asset* sources are 
  located in the `./src/static-assets/` directory
- 
- *example* : 
+
+Preprocessing pipeline example which produces a gzipped svg file with a svgz extension
+ 1. article.svg => 
+ 2. scour => 
+ 3. zopfli => 
+ 4. article.svgz
+
+The `xq link` command will produce two outcomes.
+
+1. a binary asset on the static-assets container volume. The static-assets 
+container volume is mounted on the xqerl `priv/static` container directory.
+ `priv/static/icons/article.svgz`
+2. A db `link` to the file asset.
+ *example*: the db link 
+  'http://example.com/icons/article' points to the file
+  'file:///usr/local/xqerl/priv/static/icons/article.svgz'
+
+note: links are searchable db items
 
  ```
+xq link example.com icons/article.svg
 TODO!
  ```
 
