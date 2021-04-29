@@ -567,3 +567,16 @@ xq get example.com/examples/works.xml '//employee[1]/hours => sum()'
 xq get example.com/examples/works.xml '//employee[1]/hours => sum()'
 ```
 
+#### Update Rename
+
+Update db document, with replace expression
+
+`xq update {db-uri} replace   ...`
+
+
+*example*  correct the hours for employee[1]
+```
+xq get example.com/examples/works.xml '//employee[1]/hours => sum()'
+ xq update example.com/examples/works.xml replace node '//employee[1]/hours[1]' with '<hours>25</hours>'
+xq get example.com/examples/works.xml '//employee[1]/hours => sum()'
+```
