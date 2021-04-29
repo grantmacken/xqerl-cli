@@ -12,8 +12,6 @@ printOutList( BinList ) ->
   NormalList = [binary_to_list(X) || X <- BinList],
  io:fwrite("~1p~n",[NormalList]).
 
-
-
 printOutRes( Res ) ->
   case Res of
    Etup when is_tuple(Etup), element(1, Etup) == xqError  -> xqError(Etup);
