@@ -257,32 +257,35 @@ elif echo "${args[2]}" | grep -oP '^(=>|!)' &>/dev/null
   fi
 }
 
-# [ get ]  Read - given uri get db XDM item
-function dbGetItemPath() {
-  local resource="http://$(echo $1 | grep -oP '^(http://)?\K(.+)$')"
-  local itemType=$(dbItemType $resource)
-  case "$itemType" in
-    document-node)
-      local xpath="${args[2]}"
-      echo ${xpath} | grep -oP '^/(.+)$' &>/dev/null || die 'arg [ xpath ] must be a xpath expression'
-      cmdQuery \
-        "try{('${resource}' => doc())${xpath} => serialize(map{'omit-xml-declaration': true() })} catch * {()}"
+# TODO not sure about this
+# it might be overeach 
+# and better acheived by writing main modules
+function dbCollect() {
+  local path="http://$(echo $1 | grep -oP '^(http://)?\K(.+)$')"
+  case "${#args[@]}" in
+    3)
+    local funcBody="${args[2]}"
+    cmdQuery \
+      "try {
+          (('$path' => collection()) 
+          => for-each(function(\$item){ 
+          $funcBody 
+        }))
+    } catch * {()}"
       ;;
-    array) #TODO
-      local lookup="${args[2]}"
-      cmdQuery \
-        "try{('$resource' => db:get()) => serialize(map{'method': 'json' })} catch * {()}"
-      ;;
-    map) # TODO
-      local lookup="${args[2]}"
-      cmdQuery \
-        "try{('$resource' 
-              => db:get())${lookup} 
-              => serialize(map{'method': 'json'})
-            } catch * {()}"
+    4)
+    local funcBody="${args[2]}"
+    local expr="${args[3]}"
+    cmdQuery \
+      "try {
+          (('$path' => collection()) 
+          => for-each(function(\$item){ 
+          $funcBody 
+        })) ${expr}
+    } catch * {()}"
       ;;
     *)
-      die "[ $itemType ] unknown XDM item"
+      die '- incorrect number of args: {db-uri} {each-item-function-body}?'
   esac
 }
 
@@ -481,10 +484,7 @@ try{(local:update(),'ok')  } catch * {false()}"
 }
 
 case "${args[0]}" in
-  test)
-
-    ;;
-  put) ## {domain}/{path} create xdm item from file. example: `xq put example.com/usecase/employees.xml`
+  put) ## {domain}/{data-path} create xdm item from file. example: `xq put example.com/usecase/employees.xml`
     case "${#args[@]}" in
       2) 
         dbFilePut ${args[1]}
@@ -493,7 +493,11 @@ case "${args[0]}" in
         die '- xq put {path} : incorrect number of args'
     esac
     ;;
-  list) ## {domain/path} list resources. example: `xq list example.com/usecase`
+  link) ## {domain} {asset-path} link to preprocessed binary asset` example:` xq link example.com icons/article.svg`
+  [[ ${#args[@]} -eq 3 ]] || die 'xq eval: requires 2 params {domain} {path}'
+  dbLink "${args[1]}" "${args[2]}"
+  ;;
+  list) ## {db-path} list resources. example: `xq list example.com/usecase`
     dbList ${args[1]}
     ;;
   available) ## {domain/path} list resources. example: `xq list example.com/usecase`
@@ -508,19 +512,13 @@ case "${args[0]}" in
     then dbGetLink ${res}
     elif echo ${ext} | grep -oP '^(xhtml|cmark|article|xml|array|map)$' &>/dev/null
     then
-      #case "${#args[@]}" in
-      #  2) 
-          dbGetItem "${args[1]}"
-      #    ;;
-      #  3)
-      #    dbGetItemPath "${args[1]}"
-      #    ;;
-      #  *)
-      #    die ' incorrect number of args'
-     # esac
+      dbGetItem "${args[1]}"
     else die "can not handle extension [ $ext ]"
     fi
     ;;
+   #collect) # {db-uri} return a sequence 
+   # dbCollect "${args[1]}"
+   # ;;
   update) ## {db-uri} {xpath-expression} {update-expression} update XML db resource
     # example
     # this will be a updating function
@@ -608,10 +606,6 @@ case "${args[0]}" in
    # note: `$href  => unparsed-text-lines()`
    # note: `$href  => json-doc()`
   # ;;
-  link) ## {domain} {asset-path} link to preprocessed binary asset` example:` xq link example.com icons/article.svg`
-  [[ ${#args[@]} -eq 3 ]] || die 'xq eval: requires 2 params {domain} {path}'
-  dbLink "${args[1]}" "${args[2]}"
-  ;;
   # xQuery actions [ query | compile | run ] 
   # ========================================
   query) ## {xquery-string} run a simple xQuery. example: `xq query "current-date() => string()"`
