@@ -311,10 +311,7 @@ TODO!
  - `xq get {db-uri}`
  - `xq get {db-uri} {xpath-or-lookup}`
  - `xq get {db-uri} {xpath-or-lookup} {bang-or-arrow}`
-
- TODO:
-  
-- [ ] `xq collect {db-uri}`
+ - WIP: `xq collect {db-uri}`
 
 #### List
 
@@ -498,3 +495,14 @@ Get **map** or **array**,
  Mildred Moore
 ```
 
+<!--
+#### Collect Sequence of Items
+
+Command: `xq collect {db-uri} {bang-expr}`
+-->
+
+###  Update
+
+TODO!
+
+ - `xq update {db-uri}`
