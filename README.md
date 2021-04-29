@@ -533,15 +533,24 @@ xqerl implements the
 #### Update Insert
 
 *example*:  add more hours for employee[3] 
-
 ```
-echo -n '*reference check* employee[3] hours worked: '
 xq get example.com/examples/works.xml '//employee[3]/hours => sum()'
 xq update example.com/examples/works.xml insert node '<hours>40</hours>' into '//employee[3]'
-echo -n '*update check* employee[3] hours worked: '
 xq get example.com/examples/works.xml '//employee[3]/hours => sum()'
 ```
 
+#### Update Delete
 
+Update db document, with delete expression
+
+`xq update {db-uri} delete ...`
+
+
+*example* delete first lot of hours for employee[2]
+```
+xq get example.com/examples/works.xml '//employee[2]/hours => sum()'
+xq update example.com/examples/works.xml delete node '//employee[2]/hours[1]'    
+xq get example.com/examples/works.xml '//employee[2]/hours => sum()'
+```
 
 
