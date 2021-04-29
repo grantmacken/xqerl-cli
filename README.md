@@ -549,8 +549,21 @@ Update db document, with delete expression
 *example* delete first lot of hours for employee[2]
 ```
 xq get example.com/examples/works.xml '//employee[2]/hours => sum()'
-xq update example.com/examples/works.xml delete node '//employee[2]/hours[1]'    
+xq update example.com/examples/works.xml delete node '//employee[2]/hours[1]'
 xq get example.com/examples/works.xml '//employee[2]/hours => sum()'
 ```
 
+#### Update Replace
+
+Update db document, with replace expression
+
+`xq update {db-uri} replace   ...`
+
+
+*example*  correct the hours for employee[1]
+```
+xq get example.com/examples/works.xml '//employee[1]/hours => sum()'
+ xq update example.com/examples/works.xml replace node '//employee[1]/hours[1]' with '<hours>25</hours>'
+xq get example.com/examples/works.xml '//employee[1]/hours => sum()'
+```
 
