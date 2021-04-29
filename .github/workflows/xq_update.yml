@@ -44,27 +44,26 @@ jobs:
       - name: update delete [ xq update {db-uri} delete ... ]
         run: |
           echo ' update db document, with delete expression'
-          echo -n "*reference check* employee[2] hours worked: "
+          echo -n 'reference check: employee[2] hours worked: '
           xq get example.com/examples/works.xml '//employee[2]/hours => sum()'
-          echo ' - delete first lot of hours for employee[2]'
+          echo 'example: delete first lot of hours for employee[2]'
           echo "> xq update example.com/examples/works.xml delete node '//employee[2]/hours[1]'"
           xq update example.com/examples/works.xml delete node '//employee[2]/hours[1]'
-          echo -n "*update check* employee[2] hours worked: "
+          echo -n 'update check: employee[2] hours worked: '
           xq get example.com/examples/works.xml '//employee[2]/hours => sum()'
       - name: update replace [ xq update {db-uri} replace ... ]
         run: |
           echo ' update db document, with replace expression'
-          echo ' update replace expression examples'
-          echo ' - check employee[1] hour details'
+          echo -n 'reference check: employee[1] hours worked: '
           xq get example.com/examples/works.xml '//employee[1]/hours'
-          echo ' - correct the hours for employee[1]'
+          echo 'example 1: - correct the hours for employee[1]'
           echo "> xq update example.com/examples/works.xml replace node '//employee[1]/hours[1]'  with '<hours>25</hours>'"
           xq update example.com/examples/works.xml replace node '//employee[1]/hours[1]' with '<hours>25</hours>'
-          echo ' - update result: check employee[1] hour details'
+          echo -n 'update check: check employee[1] hours'
           xq get example.com/examples/works.xml '//employee[1]/hours'
-          echo ' - or just alter the hour value'
+          echo 'example 2: - alter the hour value for employee[1]'
           echo "> xq update example.com/examples/works.xml replace 'value of node' '//employee[1]/hours[1]' with '\"30\"'"
           xq update example.com/examples/works.xml replace 'value of node' '//employee[1]/hours[1]' with '"30"'
-          echo ' - update result: check employee[1] hour details'
+          echo -n 'update check: check employee[1] hours'
           xq get example.com/examples/works.xml '//employee[1]/hours'
 
