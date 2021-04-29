@@ -569,14 +569,13 @@ xq get example.com/examples/works.xml '//employee[1]/hours => sum()'
 
 #### Update Rename
 
-Update db document, with replace expression
+Update db document, with rename expression
 
-`xq update {db-uri} replace   ...`
+`xq update {db-uri} rename ...`
 
 
-*example*  correct the hours for employee[1]
+*example* rename first employee tag to contractor
 ```
-xq get example.com/examples/works.xml '//employee[1]/hours => sum()'
- xq update example.com/examples/works.xml replace node '//employee[1]/hours[1]' with '<hours>25</hours>'
-xq get example.com/examples/works.xml '//employee[1]/hours => sum()'
+xq update example.com/examples/works.xml rename node '/works/*[1]' as '"contactor"'
+xq get example.com/examples/works.xml '//*[1]
 ```
