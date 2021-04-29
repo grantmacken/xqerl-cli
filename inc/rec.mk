@@ -10,8 +10,7 @@ pr-create:
 
 .PHONY: pr-merge
 pr-merge: 
-	gh pr merge -s -d
-	git pull
+	@gh pr merge -s -d && git pull
 
 .PHONY: rec-xq-db
 rec-xq-db:

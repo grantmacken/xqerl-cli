@@ -13,42 +13,6 @@ building microservices and modern data driven websites.
 This repo also a provides a simple directory structure,
 you can use as a template when creating xQuery projects.
 
-## WIP xq commands 
-
-xq Create Read Update Delete (CRUD) commands for working with xqerl database
- - [x] `xq put {srcFile}` given *srcFile*, **create** a db XDM item then return 
-db location URI 
- - [x] `xq link {srcFile}` given *domain* and *srcFile*, **create** a db link 
-to a binary or unparsed text file then return db location URI 
- - [x] `xq list {db-uri}` given *db-uri*, return uri list of db resources
- - [x] `xq available {db-uri}` given *db-uri*, return true or false
- - [ ] `xq type {db-uri}` given *db-uri*, return the db XDM type
- - [x] `xq get {db-uri}` given *db-uri*, return serialized db XDM item
- - [x] `xq get {db-uri}` `{xpath}` given *db-uri* and *xpath* expression, return serialized XML string
- - [ ] `xq get {db-uri}` `{lookup}` given *db-uri* and *lookup* expression, return serialized JSON item
- - [ ] `xq collect {db-collection-uri}` given *db-collection-uri*,  collect sequence, return serialized items
- - [ ] `xq collect {db-collection-uri}` `{simple map expression}`  
-  given *db-collection-uri*, collect sequence, apply bang expression then return  return serialized items
- - [ ] `xq collect {db-collection-uri}` `{arrow expression}`  given *db-collection-uri*,  return serialized db XDM items
-  given *db-collection-uri*, collect sequence, apply arrow expression then return serialized item or items 
- - [x] `xq update {db-uri} {update-expression}` given *db-uri* and 
-*update-expression*, **update** XML resource, then return true or false
- - [x] `xq delete {db-uri}` given *db-uri*, **delete** item, then return true 
-or false
- - [ ] `xq destroy {db-uri}` given *db-uri*, **destroy** everything in db 
-collection, then return true or false
-
-## WIP make commands
- - [x] `make up` run a dockerized xqerl instance 
- - [x] `make down` stop dockerized xqerl instance 
- - [ ] `make boot` on os boot run a dockerized xqerl instance using systemd
- - [x] `make escripts` copy any changed escripts into running xqerl instance 
- - [x] `make main-modules` copy and check compile status of any changed xQuery main-modules
- - [ ] `make library-modules` copy and compile an ordered list of  xQuery library-modules
- - [ ] `make watch` watch for changes to escripts, main-modules and library-modules 
- - [ ] `make backup` tar xqerl docker volumes 
- - [ ] `make restore` restore xqerl docker volumes with backup tars   
-
 ## Getting Started
 
 ```
