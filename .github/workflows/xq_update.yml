@@ -38,15 +38,56 @@ jobs:
           make main-modules
           echo ${{ secrets.GITHUB_TOKEN }} | docker login docker.pkg.github.com --username ${GITHUB_ACTOR} --password-stdin &> /dev/null
           make pull
-      - name: Update  [ xq update {db-uri} rename ]
+      - name: Update setup
         run: |
-          echo ' - update examples'
           echo ' - create works data'
           echo '> xq put example.com/examples/works.xml'
           xq put example.com/examples/works.xml
-      - name:  update db document, with rename expression
+      - name: Update Insert [ xq update {db-uri} insert ... ]
         run: |
-          echo ' update rename expression examples'
+          echo ' update db document, with insert expression'
+          echo -n "*reference check* employee[3] hours worked: "
+          xq get example.com/examples/works.xml '//employee[3]/hours => sum()'
+          echo -n "*reference check* all employee hours: "
+          xq get example.com/examples/works.xml '//employee/hours => sum()'
+          echo ' *insert example*: add more hours for employee[3]'
+          echo "> xq update example.com/examples/works.xml insert node '<hours>40</hours>' into '//employee[3]'"
+          xq update example.com/examples/works.xml insert node '<hours>40</hours>' into '//employee[3]'
+          echo -n ' *update check*: employee[3] hours worked: '
+          xq get example.com/examples/works.xml '//employee[3]/hours => sum()'
+          echo -n ' *update check*: all employee hours worked: '
+          xq get example.com/examples/works.xml '//employee/hours => sum()'
+          printf %60s | tr ' ' '-' && echo
+      - name: update replace [ xq update {db-uri} replace ]
+        run: |
+          echo ' update db document, with replace expression'
+          echo -n 'reference check: employee[1] hours worked: '
+          xq get example.com/examples/works.xml '//employee[1]/hours'
+          echo 'example 1: - correct the hours for employee[1]'
+          echo "> xq update example.com/examples/works.xml replace node '//employee[1]/hours[1]'  with '<hours>25</hours>'"
+          xq update example.com/examples/works.xml replace node '//employee[1]/hours[1]' with '<hours>25</hours>'
+          echo -n 'update check: check employee[1] hours'
+          xq get example.com/examples/works.xml '//employee[1]/hours'
+          echo 'example 2: - alter the hour value for employee[1]'
+          echo "> xq update example.com/examples/works.xml replace 'value of node' '//employee[1]/hours[1]' with '\"30\"'"
+          xq update example.com/examples/works.xml replace 'value of node' '//employee[1]/hours[1]' with '"30"'
+          echo -n 'update check: check employee[1] hours'
+          xq get example.com/examples/works.xml '//employee[1]/hours'
+          printf %60s | tr ' ' '-' && echo
+      - name: update delete [ xq update {db-uri} delete ... ]
+        run: |
+          echo ' update db document, with delete expression'
+          echo -n 'reference check: employee[2] hours worked: '
+          xq get example.com/examples/works.xml '//employee[2]/hours => sum()'
+          echo 'example: delete first lot of hours for employee[2]'
+          echo "> xq update example.com/examples/works.xml delete node '//employee[2]/hours[1]'"
+          xq update example.com/examples/works.xml delete node '//employee[2]/hours[1]'
+          echo -n 'update check: employee[2] hours worked: '
+          xq get example.com/examples/works.xml '//employee[2]/hours => sum()'
+          printf %60s | tr ' ' '-' && echo
+      - name: update rename[ xq update {db-uri} rename ]
+        run: |
+          echo 'update db document, with rename expressions'
           echo ' - check first works node'
           xq get example.com/examples/works.xml '/works/*[1]'
           echo ' - rename employee tag to contractor'
@@ -60,4 +101,5 @@ jobs:
           xq get example.com/examples/works.xml '//employee/hours => sum()'
           echo ' - update result: check all hours worked'
           xq get example.com/examples/works.xml '/works/*/hours => sum()'
+          printf %60s | tr ' ' '-' && echo
 
