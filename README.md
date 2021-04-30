@@ -526,3 +526,14 @@ Update db document, with rename expression
 xq update example.com/examples/works.xml rename node '/works/*[1]' as '"contactor"'
 xq get example.com/examples/works.xml '//*[1]
 ```
+
+### Delete
+
+Command: `xq {db-uri}` 
+ deletes item in collection
+
+*example* delete colors array
+
+```
+xq delete 
+```

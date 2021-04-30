@@ -497,17 +497,17 @@ case "${args[0]}" in
   [[ ${#args[@]} -eq 3 ]] || die 'xq eval: requires 2 params {domain} {path}'
   dbLink "${args[1]}" "${args[2]}"
   ;;
-  list) ## {db-path} list resources. example: `xq list example.com/usecase`
+  list) ## {db-path} list items. example: `xq list example.com/usecase`
     dbList ${args[1]}
     ;;
-  available) ## {domain/path} list resources. example: `xq list example.com/usecase`
+  available) ## {db-uri} is item avaialable. example: `xq list example.com/usecase`
     isAvailable "${args[1]}"
     ;;
-  get) ## {domain}/{path} retrieve and serialize resource . example: `xq get example.com/usecase/employees.xml`
+  get) ## {db-uri} retrieve and serialize resource . example: `xq get example.com/usecase/employees.xml`
     res="${args[1]}"
     base=$(basename -- "$res")
     ext="${base##*.}"
-    #  local regItem="^(xml|array|map)$"
+    $(isAvailable "${args[1]}") || die " [ $base ] resource unavailable "
     if echo ${ext} | grep -oP '^(svgz)$' &>/dev/null
     then dbGetLink ${res}
     elif echo ${ext} | grep -oP '^(xhtml|cmark|article|xml|array|map)$' &>/dev/null
