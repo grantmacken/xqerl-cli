@@ -268,7 +268,7 @@ note: links are searchable db items
 
 TODO!
 
-### Read 
+### Read or Retrieve 
 
  - `xq list {db-uri}`
  - `xq available {db-uri}`
@@ -276,6 +276,59 @@ TODO!
  - `xq get {db-uri} {xpath-or-lookup}`
  - `xq get {db-uri} {xpath-or-lookup} {bang-or-arrow}`
  - WIP: `xq collect {db-uri}`
+
+Database retrieval patterns
+ 1. **Find** `xq list {db-uri}` - items in db collections
+  1.  retrieve *list* of uri 
+  2.  with list apply *filter* TODO!
+    - by item type ( document node,   )
+    - document nodes - by root element ? 
+    - map - by object key in item
+    - by whatever
+  3.  with list  *sort* TODO!
+  4. display list
+ 2.  **Pick** `xq get {db-uri}` - retrieve and display a single sequence item 
+   1. retrieve document-node then display serialized item as XML string
+   2. retrieve array then display serialized item as JSON string
+   3. retrieve array then display display serialized item as JSON string
+ 3. **Drill-down** `xq get {db-uri} {xpath-or-lookup}` - extract sequence item from parent
+   1. extract node sequence with *xpath* expression then serialize each single item as XML string
+   2. extract array object sequence with *lookup* expression then serialize each single item as JSON string
+   2. extract map object sequence with *lookup* expression then item then serialize each single item as JSON string
+ 4. **Apply xQuery expression** `xq get {db-uri} {xpath-or-lookup} {bang-or-arrow}`
+  with 'drill-down' result (a sequence item) apply **bang** or **arrow** expression
+
+ 
+
+Document retrieval drill-down patten
+{lhs} {op} {rhs}
+ where {lhs} is either a 
+  1. document node
+  2. array or map item
+{lhs} {op} {rhs}
+ where {op} is either a
+  1. path operator '/' if {lhs} is a document node
+  2. lookup operator '?' if {lhs} is a map or array
+{lhs} {op} {rhs} where {rhs} is ether 
+ where {rhs} is either a
+  1. step expression if {lhs} is a document node
+  2. object lookup expression if {lhs} is a map or array
+
+ Applying xQuery expression to drill-down result.
+
+{lhs} {op} {rhs}
+ where {lhs} a drill-down sequence item
+{lhs} {op} {rhs}
+ where {op} is either a 
+  1. bang operator '!'
+  1. arrow operator '=>'
+{lhs} {op} {rhs}
+ where {rhs} is a xQuery expression applicable bang or array expressions
+
+```
+( {drill-down result seq} ) => sum()
+( {drill-down result seq} ) !  ./name/string()
+```
 
 #### List
 
@@ -453,7 +506,7 @@ Get **map** or **array**,
  then use bang expression
  to return a serialized JSON string.
 
-*example*: format Mildreds' name 
+*example*: format mildreds' name 
 ```
 > xq get example.com/examples/mildred.map '! ``[ `{.?firstname}` `{.?lastname}`]``'
  Mildred Moore
@@ -467,6 +520,62 @@ Command: `xq collect {db-uri} {bang-expr}`
 
 ###  Update
 
-TODO!
+' xq update {db-uri} [insert, replace, delete, rename ]'
 
- - `xq update {db-uri}`
+xqerl implements the 
+ [xQuery update facility](https://www.w3.org/TR/xquery-update-30/)
+
+ - insert
+ - replace
+ - delete
+ - rename
+
+#### Update Insert
+
+*example*:  add more hours for employee[3] 
+```
+xq get example.com/examples/works.xml '//employee[3]/hours => sum()'
+xq update example.com/examples/works.xml insert node '<hours>40</hours>' into '//employee[3]'
+xq get example.com/examples/works.xml '//employee[3]/hours => sum()'
+```
+
+#### Update Delete
+
+Update db document, with delete expression
+
+`xq update {db-uri} delete ...`
+
+
+*example* delete first lot of hours for employee[2]
+```
+xq get example.com/examples/works.xml '//employee[2]/hours => sum()'
+xq update example.com/examples/works.xml delete node '//employee[2]/hours[1]'
+xq get example.com/examples/works.xml '//employee[2]/hours => sum()'
+```
+
+#### Update Replace
+
+Update db document, with replace expression
+
+`xq update {db-uri} replace   ...`
+
+
+*example*  correct the hours for employee[1]
+```
+xq get example.com/examples/works.xml '//employee[1]/hours => sum()'
+ xq update example.com/examples/works.xml replace node '//employee[1]/hours[1]' with '<hours>25</hours>'
+xq get example.com/examples/works.xml '//employee[1]/hours => sum()'
+```
+
+#### Update Rename
+
+Update db document, with rename expression
+
+`xq update {db-uri} rename ...`
+
+
+*example* rename first employee tag to contractor
+```
+xq update example.com/examples/works.xml rename node '/works/*[1]' as '"contactor"'
+xq get example.com/examples/works.xml '//*[1]
+```

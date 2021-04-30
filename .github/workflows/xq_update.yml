@@ -1,0 +1,105 @@
+name: xq_update
+on: 
+  push:
+    branches:
+      - 'actions-xq-update'
+defaults:
+  run:
+    shell: bash
+jobs:
+  xqerl-cli-crud-ops:
+    runs-on: ubuntu-latest
+    services:
+       xq:
+        image: grantmacken/alpine-xqerl
+        ports:
+          - 8081:8081
+        options: >-
+          --name xq
+          --mount "type=volume,target=/user/local/xqerl/priv/static/assets,source=static-assets"
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+      - name: set up 
+        run: |
+          echo ' - set up xqerl project working environment'
+          source .env
+          echo -n ' - ${RUN_NAME} running: ' 
+          docker container inspect -f '{{.State.Running}}' ${RUN_NAME}
+          echo -n ' - xqerl application all started: '
+          docker exec xq xqerl eval 'application:ensure_all_started(xqerl).' | grep -oP 'ok'
+          mkdir -p $HOME/.local/bin
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          pushd $HOME/.local/bin && ln -s ${GITHUB_WORKSPACE}/bin/xq && popd
+          make clean
+          make escripts
+          make main-modules
+          echo ${{ secrets.GITHUB_TOKEN }} | docker login docker.pkg.github.com --username ${GITHUB_ACTOR} --password-stdin &> /dev/null
+          make pull
+      - name: Update setup
+        run: |
+          echo ' - create works data'
+          echo '> xq put example.com/examples/works.xml'
+          xq put example.com/examples/works.xml
+      - name: Update Insert [ xq update {db-uri} insert ... ]
+        run: |
+          echo ' update db document, with insert expression'
+          echo -n "*reference check* employee[3] hours worked: "
+          xq get example.com/examples/works.xml '//employee[3]/hours => sum()'
+          echo -n "*reference check* all employee hours: "
+          xq get example.com/examples/works.xml '//employee/hours => sum()'
+          echo ' *insert example*: add more hours for employee[3]'
+          echo "> xq update example.com/examples/works.xml insert node '<hours>40</hours>' into '//employee[3]'"
+          xq update example.com/examples/works.xml insert node '<hours>40</hours>' into '//employee[3]'
+          echo -n ' *update check*: employee[3] hours worked: '
+          xq get example.com/examples/works.xml '//employee[3]/hours => sum()'
+          echo -n ' *update check*: all employee hours worked: '
+          xq get example.com/examples/works.xml '//employee/hours => sum()'
+          printf %60s | tr ' ' '-' && echo
+      - name: update replace [ xq update {db-uri} replace ]
+        run: |
+          echo ' update db document, with replace expression'
+          echo -n 'reference check: employee[1] hours worked: '
+          xq get example.com/examples/works.xml '//employee[1]/hours'
+          echo 'example 1: - correct the hours for employee[1]'
+          echo "> xq update example.com/examples/works.xml replace node '//employee[1]/hours[1]'  with '<hours>25</hours>'"
+          xq update example.com/examples/works.xml replace node '//employee[1]/hours[1]' with '<hours>25</hours>'
+          echo -n 'update check: check employee[1] hours'
+          xq get example.com/examples/works.xml '//employee[1]/hours'
+          echo 'example 2: - alter the hour value for employee[1]'
+          echo "> xq update example.com/examples/works.xml replace 'value of node' '//employee[1]/hours[1]' with '\"30\"'"
+          xq update example.com/examples/works.xml replace 'value of node' '//employee[1]/hours[1]' with '"30"'
+          echo -n 'update check: check employee[1] hours'
+          xq get example.com/examples/works.xml '//employee[1]/hours'
+          printf %60s | tr ' ' '-' && echo
+      - name: update delete [ xq update {db-uri} delete ... ]
+        run: |
+          echo ' update db document, with delete expression'
+          echo -n 'reference check: employee[2] hours worked: '
+          xq get example.com/examples/works.xml '//employee[2]/hours => sum()'
+          echo 'example: delete first lot of hours for employee[2]'
+          echo "> xq update example.com/examples/works.xml delete node '//employee[2]/hours[1]'"
+          xq update example.com/examples/works.xml delete node '//employee[2]/hours[1]'
+          echo -n 'update check: employee[2] hours worked: '
+          xq get example.com/examples/works.xml '//employee[2]/hours => sum()'
+          printf %60s | tr ' ' '-' && echo
+      - name: update rename[ xq update {db-uri} rename ... ]
+        run: |
+          echo 'update db document, with rename expressions'
+          echo ' - check first works node'
+          xq get example.com/examples/works.xml '/works/*[1]'
+          echo ' - rename employee tag to contractor'
+          echo "> xq update example.com/examples/works.xml rename node '/works/*[1]' as '\"contactor\"'"
+          xq update example.com/examples/works.xml rename node '/works/*[1]' as '"contactor"'
+          echo ' - update result: check first works node'
+          xq get example.com/examples/works.xml '/works/*[1]'
+          echo ' - update result: check contractor hours'
+          xq get example.com/examples/works.xml '//contactor/hours => sum()'
+          echo ' - update result: check employee hours'
+          xq get example.com/examples/works.xml '//employee/hours => sum()'
+          echo ' - update result: check all hours worked'
+          xq get example.com/examples/works.xml '/works/*/hours => sum()'
+          printf %60s | tr ' ' '-' && echo
+
