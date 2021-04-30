@@ -85,7 +85,7 @@ jobs:
           echo -n 'update check: employee[2] hours worked: '
           xq get example.com/examples/works.xml '//employee[2]/hours => sum()'
           printf %60s | tr ' ' '-' && echo
-      - name: update rename[ xq update {db-uri} rename ]
+      - name: update rename[ xq update {db-uri} rename ... ]
         run: |
           echo 'update db document, with rename expressions'
           echo ' - check first works node'
