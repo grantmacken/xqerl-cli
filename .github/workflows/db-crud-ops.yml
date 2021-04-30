@@ -233,3 +233,15 @@ jobs:
           echo ' - update result: check all hours worked'
           xq get example.com/examples/works.xml '/works/*/hours => sum()'
           printf %60s | tr ' ' '-' && echo
+      - name: Delete [ xq delete {db-uri} ]
+        run: |
+          echo ' delete item, from db collevtion'
+          echo 'reference check: get colors.array'
+          xq get example.com/examples/colors.array
+          echo 'example: delete colors.array item from db'
+          echo '> xq delete example.com/examples/colors.array'
+          xq delete example.com/examples/colors.array
+          echo 'delete check: get colors.array'
+          xq get example.com/examples/colors.array
+
+
