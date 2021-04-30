@@ -174,9 +174,7 @@ jobs:
           xq get example.com/examples/mildred.map \
           '! ``[ `{.?firstname}` `{.?lastname}`]``'
           printf %60s | tr ' ' '-' && echo
-      - name: Read  [ xq collect {db-collection-uri} ] 
-        run: echo "TODO"
-     - name: Update Insert [ xq update {db-uri} insert ... ]
+      - name: Update Insert [ xq update {db-uri} insert ... ]
         run: |
           echo ' update db document, with insert expression'
           echo -n "*reference check* employee[3] hours worked: "
@@ -235,4 +233,3 @@ jobs:
           echo ' - update result: check all hours worked'
           xq get example.com/examples/works.xml '/works/*/hours => sum()'
           printf %60s | tr ' ' '-' && echo
-
