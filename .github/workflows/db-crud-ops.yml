@@ -2,7 +2,7 @@ name: xqerl db CRUD ops
 on: 
   push:
     branches:
-      - 'unparsed_text'
+      - 'main'
 defaults:
   run:
     shell: bash
