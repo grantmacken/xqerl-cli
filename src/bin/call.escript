@@ -8,14 +8,12 @@
 
 main([Mod, Func, Arg]) ->
   {ok, _} = net_kernel:start([?SELF_NODE, longnames]),
-  Bin = list_to_binary(Arg),
   Res = rpc:call( 
           'xqerl@127.0.0.1', 
           list_to_atom(Mod), 
           list_to_atom(Func), 
-          [Bin]), 
-  % io:format( "~s\n", [ Res ] ),
-  io:format( "~p\n", Res ).
+          [Arg]), 
+  io:format( Res ).
 
   
 
