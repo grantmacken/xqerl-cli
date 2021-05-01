@@ -242,7 +242,7 @@ jobs:
           echo '> xq delete example.com/examples/colors.array'
           xq delete example.com/examples/colors.array
           echo 'delete check: get colors.array'
-          xq get example.com/examples/colors.array
+          xq get example.com/examples/colors.array || true
           echo ' - you can also delete db link items'
           echo 'note: deleting a link item will not delete the file it references'
           echo '> xq delete http://example.com/icons/article.svgz'
