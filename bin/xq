@@ -291,7 +291,7 @@ function dbCollect() {
 
 # TODO  [ get ]  Read - db link 
 function dbGetLink() {
-  local local resource="http://$(echo $1 | grep -oP '^(http://)?\K(.+)$')"
+  local resource="http://$(echo $1 | grep -oP '^(http://)?\K(.+)$')"
   local collection=$(dirname $resource)
   if [ -n "$(dbList $collection | grep -oP "^${resource}$")" ]
     then
@@ -304,54 +304,53 @@ function dbGetLink() {
 
 # [ list ] Read - list db uri collections
 function dbList() {
-  local path="http://$(echo $1 | grep -oP '^(http://)?\K(.+)$')"
+  local collection="http://$(echo $1 | grep -oP '^(http://)?\K(.+)$')"
   cmdQuery \
-    "try { ('$path' => uri-collection()) => string-join('&#10;') } catch * {()}" 
+    "try { 
+      ('$collection' => uri-collection()) => 
+      string-join('&#10;') 
+    } catch * { 'warn: nothing in collection [ $collection ]' }" 
 }
 
 # [ available ] Read - is db item available
 function isAvailable() {
   local resource="http://$(echo $1 | grep -oP '^(http://)?\K(.+)$')"
   cmdQuery \
-    "( '$resource' = ( remove( \
-        '$resource' => \
-        tokenize('/'),'$resource' => \
-        tokenize('/') => \
-        count()\
-        )\
-      ) => \
-      string-join('/')  => \
-      string() => \
-      uri-collection()\
-    ) => string()"
-}
-
-function dbUpdate() {
-  local resource="http://$(echo $1 | grep -oP '^(http://)?\K(.+)$')"
-  if isDocAvailable $resource &> /dev/null
-  then
-    cmdQuery \
-      "'$resource' => doc() => serialize()"
-    else die "xQuery update facilty only available for XML documents[ $ext ]"
-  fi
+    "( '$resource' = 
+      (remove( '$resource' => tokenize('/'),'$resource' => tokenize('/') => count())) => \
+      string-join('/')  => string() => uri-collection()
+     ) => string()"
 }
 
 # [ delete ] Delete - delete a single XDM or link item
 function dbDeleteItem() {
-  local resource="http://$(echo $1 | grep -oP '^(http://)?\K(.+)$')"
-  if "$( isDocAvailable $resource )"
-  then
-    cmdQuery  "'$resource' => db:delete()"
-    ok "resource deleted from db: [ $resource ]"
-  else 
-    if isAvailable $resource
-      then
-      cmdQuery  "'$resource' => db:delete()" &>/dev/null
-      ok "resource deleted from db: [ $resource ]"
-    else
-      die "resource NOT found in db: [ $resource ]"
-    fi
-  fi
+  local item="http://$(echo $1 | grep -oP '^(http://)?\K(.+)$')"
+  cmdQuery \
+    "try { 
+      let \$it := '$item' => db:get()
+      return
+      if ( \$it instance of map(*) )
+      then ( ' - deleted map item [ $item ] ', '$item' => db:delete() )
+      else if( \$it instance of array(*) )
+      then ( ' - deleted array item [ $item ] ', '$item' => db:delete() )
+      else if( \$it instance of document-node() )
+      then ( ' - deleted document-node [ $item ] ', '$item' => db:delete() )
+      else if( \$it instance of item() )
+      then ( ' - deleted item [ $item ] ', '$item' => db:delete() )
+      else 'warn: delete item not available [ ${item} ]'
+    }
+  catch * {' - error: failed to delete [ ${item} ]'}"
+}
+
+function dbDeleteCollection() { 
+  [[ "$1" = "collection" ]] || die 'args are `delete collection {db-uri}` '  
+  local collection="http://$(echo "$2" | grep -oP '^(http://)?\K(.+)$')"
+  cmdQuery \
+  "declare %updating function local:delete(){
+  for \$var in ( '$collection' => uri-collection() )
+    return ( \$var => db:delete(), ' - deleted:' ||  \$var ) }; 
+  try { local:delete() } 
+  catch * {' error: failed to delete [ $collection ]'}"
 }
 
 function dbDomainExists() {
@@ -376,9 +375,7 @@ function getDoc() {
     "'$1' => doc() => serialize(map{'omit-xml-declaration': true() })"
 }
 
-function dbDeleteCollection() { 
- echo 'TODO'
-}
+
 
 function doCompile() { 
   local base="$(echo $1 | grep -oP '^(src/(main_modules|library_modules)/)?\K(.+)$')"
@@ -494,7 +491,7 @@ case "${args[0]}" in
     esac
     ;;
   link) ## {domain} {asset-path} link to preprocessed binary asset` example:` xq link example.com icons/article.svg`
-  [[ ${#args[@]} -eq 3 ]] || die 'xq eval: requires 2 params {domain} {path}'
+  [[ ${#args[@]} -eq 3 ]] || die 'xq link: requires 2 params {domain} {path}'
   dbLink "${args[1]}" "${args[2]}"
   ;;
   list) ## {db-path} list items. example: `xq list example.com/usecase`
@@ -580,16 +577,20 @@ case "${args[0]}" in
         die 'xq update {uri} [ insert | delete | replace | rename ] '
     esac
     ;;
-  delete) ## {domain}/{path} delete resource from db. example: `xq delete example.com/static-assets/icons/article.svg`
+  delete) ## {db-uri} delete item from db. example: `xq delete example.com/examples/colors.json`
       case "${#args[@]}" in
         2) 
           dbDeleteItem "${args[1]}"
+          ;;
+        3) 
+          dbDeleteCollection "${args[1]}" "${args[2]}"
+          
           ;;
         *)
           die '- xq delete {db-uri} : incorrect number of args'
       esac
    ;;
-  #domain) # {domain} check if domain exists in db. example: `xq db-exists example.com` 
+   #domain) # {domain} check if domain exists in db. example: `xq db-exists example.com` 
   #  dbDomainExists ${args[1]}
   # ;;
   #type) TODO {domain}/{path} get xdm type. example: `xdm item-type example.com/usecase/employees.xml`
