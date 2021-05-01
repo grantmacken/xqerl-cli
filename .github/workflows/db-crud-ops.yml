@@ -1,4 +1,4 @@
-name: crud_ops
+name: unparsed_text
 on: 
   push:
     branches:
@@ -40,7 +40,7 @@ jobs:
           make pull
       - name:  Create Read Update Delete
         run: |
-          echo ' create: put | link | plonk'
+          echo ' create: put | plonk | link'
       - name: Create [ xq put {file} ]
         run: |
           echo ' - create employees data'
@@ -66,6 +66,20 @@ jobs:
           printf %60s | tr ' ' '-' && echo
           echo '> xq put src/data/example.com/examples/hello-world.html'
           xq put src/data/example.com/examples/hello-world.html
+          printf %60s | tr ' ' '-' && echo
+      - name: Create [ xq plonk {file} ] store unparsed text into db
+        run: |
+          echo 'Given a path argument, the plonk command stores a text file into the database,' 
+          echo 'then returns the location of the stored unparsed text item.'
+          echo 'The raw text is just plonked into the database bypassing'
+          echo 'the "file to XDM item conversion" as done by `xq put`'
+          echo 'Data may be extracted from a string, using xQuery string functions'
+          echo 'as well as xQuery `matches#2`,`replace#3` and `tokenize#2` regular expressions' 
+          echo 'Example:  store a markdown document as a `xs:string` XDM item'
+          echo '> xq plonk src/data/example.com/content/index.md'
+          xq plonk src/data/example.com/content/index.md
+          echo 'Check: get the stored item'
+          xq get example.com/content/index.md
           printf %60s | tr ' ' '-' && echo
       - name: Create [ xq link {file} ]
         run: |

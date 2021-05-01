@@ -83,8 +83,8 @@ let $funcType := function( $item as item()) as xs:string {
 let $itemType := function( $item as item() ) as xs:string {
  if ( $item instance of node() ) then $item => $nodeKind()
  else if ( $item instance of function(*) ) then $item => $funcType()
- else if ( $item instance of xs:anyAtomicType ) then 'atomic' (: TODO :)
- else ( )
+ else if ( $item instance of xs:anyAtomicType )  then $item => $atomicType()
+ else ( 'unknown instance' )
    (:throw err:)
 }
 
