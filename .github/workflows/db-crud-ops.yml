@@ -2,7 +2,7 @@ name: crud_ops
 on: 
   push:
     branches:
-      - 'main'
+      - 'crud-delete'
 defaults:
   run:
     shell: bash
