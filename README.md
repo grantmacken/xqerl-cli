@@ -60,11 +60,13 @@ Each database contains collections of items referenced as URIs.
 
 ## xqerl database items
 
-The xqerl database can store 
+The xqerl database can store
 
-1. [ XQuery and XPath Data Model](https://www.w3.org/TR/xpath-datamodel-31/) (**XDM**) items. These include document-nodes, arrays, maps and functions
+1. [ XQuery and XPath Data Model](https://www.w3.org/TR/xpath-datamodel-31/) (**XDM**) items:  These include document-nodes, arrays, maps and functions
 
-2. links A db *link* is a reference to binary or unparsed text file on the containers file system
+2. link items: A db *link* is a reference to binary or unparsed text file on the containers file system
+3. unparsed text items: A unparsed text item is one which is an item not parsed into a XDM item. 
+ Data may extracted from unparsed text using a xQuery string function and regular expressions.
 
 ## xqerl database 
  [CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete) 
@@ -529,7 +531,7 @@ xq get example.com/examples/works.xml '//*[1]
 
 ### Delete
 
-Command: `xq {db-uri}` 
+Command: `xq delete {db-uri}` 
  deletes item in collection
 
 *example* delete colors array

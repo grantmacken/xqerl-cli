@@ -14,7 +14,8 @@ main([Mod, Func, Arg]) ->
           list_to_atom(Mod), 
           list_to_atom(Func), 
           [Bin]), 
-  io:format( Res).
+  % io:format( "~s\n", [ Res ] ),
+  io:format( "~p\n", Res ).
 
   
 
