@@ -1,8 +1,8 @@
-name: unparsed_text
+name: xqerl db CRUD ops
 on: 
   push:
     branches:
-      - 'main'
+      - 'unparsed_text'
 defaults:
   run:
     shell: bash
