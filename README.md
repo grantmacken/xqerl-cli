@@ -63,10 +63,9 @@ Each database contains collections of items referenced as URIs.
 The xqerl database can store
 
 1. [ XQuery and XPath Data Model](https://www.w3.org/TR/xpath-datamodel-31/) (**XDM**) items:  These include document-nodes, arrays, maps and functions
-
-2. link items: A db *link* is a reference to binary or unparsed text file on the containers file system
-3. unparsed text items: A unparsed text item is one which is an item not parsed into a XDM item. 
- Data may extracted from unparsed text using a xQuery string function and regular expressions.
+2. Unparsed text items: A stored unparsed text item is one which is an item not parsed into a XDM item. 
+ Data may be extracted from unparsed text using `fn:unparsed-text#1`, and the data extracted via xQuery string functions and regular expressions.
+3. link items: A db *link* is a reference to binary or unparsed text file on the containers file system
 
 ## xqerl database 
  [CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete) 
@@ -77,8 +76,8 @@ Create Read Update Delete
 ### Create
 
  - `xq put {file-path}`
+ - `xq plonk {file-path}` 
  - `xq link {file-path}`
- - `xq plonk {file-path}` TODO! put unparsed text into db
 
 #### Put
 
@@ -172,10 +171,9 @@ A [dockerized](https://github.com/grantmacken/alpine-cmark)
 > xq put src/data/example.com/content/index.md
  - ok: stored into db
  - XDM item: document-node
- - location: http://example.com/content/index.cmark
+ - location: http://example.com/content/index.cmark.xml
 ```
 
-Note: the cmark extension is an arbitrary construct. 
 Note: TODO! - another section on cmark XML to HTML conversion using xQuery
 modules
 
@@ -185,8 +183,7 @@ A [dockerized htmltidy](https://github.com/grantmacken/alpine-htmltidy)
  can produce from a HTML source, a well formed XML document. 
 
 **** *example*: 
- with hello-world.html convert into well-formed XML, 
- then store into db as a **document-node**.
+ store hello-world.html into db as a **document-node**.
 
 ```
 > xq put src/data/example.com/examples/hello-world.html
@@ -195,8 +192,40 @@ A [dockerized htmltidy](https://github.com/grantmacken/alpine-htmltidy)
  - location: http://example.com/examples/hello-world.xhtml
 ```
 
-Note: the xhtml extension is an arbitrary construct
+#### Plonk
 
+Command: `xq plonk {text-file}`
+
+Given a path argument, 
+the plonk command stores a text file into the database, 
+then returns the location of the stored unparsed text item.
+
+The raw text is just plonked into the database 
+ bypassing the 'file to XDM item conversion' as done by `xq put`.
+ The raw text will be stored as the `xs:string` XDM data type
+ and the resource can be retrieved using the xQuery `fn:unparsed-text#1` function.
+
+Data may be extracted from a string, using xQuery string functions as well as 
+xQuery `matches#2`,`replace#3` and `tokenize#2` regular expressions 
+
+Use cases: 
+ You might want to store a markdown document 'as is' so
+ it can be inserted into a HTML textarea.
+
+Example:  store a markdown document as a `xs:string` XDM item
+
+```
+> xq plonk example.com/content/index.md
+text
+http://example.com/content/index.md
+ - ok: stored into db
+ - XDM item:  xs:string
+ - location: http://example.com/content/index.md
+```
+
+
+
+ 
 #### Link
 
 Command: `xq link {domain} {asset-path}`
