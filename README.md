@@ -216,16 +216,12 @@ Example:  store a markdown document as a `xs:string` XDM item
 
 ```
 > xq plonk example.com/content/index.md
-text
 http://example.com/content/index.md
  - ok: stored into db
  - XDM item:  xs:string
  - location: http://example.com/content/index.md
 ```
 
-
-
- 
 #### Link
 
 Command: `xq link {domain} {asset-path}`
@@ -295,9 +291,6 @@ note: links are searchable db items
 1. file: /usr/local/xqerl/priv/static/assets/fonts/ibm-plex-mono-v5-latin-regular.woff2
 2. db link: http://example.com/fonts/ibm-plex-mono-v5-latin-regular.woff2
  ```
-#### Plonk
-
-TODO!
 
 ### Read or Retrieve 
 
@@ -566,5 +559,6 @@ Command: `xq delete {db-uri}`
 *example* delete colors array
 
 ```
-xq delete 
+> xq delete example.com/examples/colors.array
+ - deleted array item [ http://example.com/examples/colors.array ]
 ```
