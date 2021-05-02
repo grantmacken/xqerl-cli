@@ -368,8 +368,10 @@ function dbDeleteItem() {
       then ( ' - deleted array item [ $item ] ', '$item' => db:delete() )
       else if( \$it instance of document-node() )
       then ( ' - deleted document-node [ $item ] ', '$item' => db:delete() )
+      else if( \$it instance of xs:string )
+      then ( ' - deleted xs:string [ $item ] ', '$item' => db:delete() )
       else if( \$it instance of item() )
-      then ( ' - deleted item [ $item ] ', '$item' => db:delete() )
+      then ( ' - item unknown [ $item ] )
       else 'warn: delete item not available [ ${item} ]'
     }
   catch * {' - error: failed to delete [ ${item} ]'}"
